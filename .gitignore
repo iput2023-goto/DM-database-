@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# SQLite WAL / shared memory files
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Environment & OS files
+.env*
+.DS_Store
+Thumbs.db
+*.log
