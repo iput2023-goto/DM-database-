@@ -167,7 +167,7 @@ function main() {
       cost: 13,
       power: '13000',
       race: 'アンノウン/ゼニス',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex4-002.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC001CHO.jpg',
     },
     {
       id: 'dm26ex5-SEC002CHO',
@@ -179,7 +179,7 @@ function main() {
       cost: 8,
       power: '13000',
       race: 'リキッド・ピープル',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC001.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC002CHO.jpg',
     },
     {
       id: 'dm26ex5-SEC003CHO',
@@ -191,7 +191,7 @@ function main() {
       cost: 6,
       power: '6000',
       race: 'マフィ・ギャング',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC002.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC003CHO.jpg',
     },
     {
       id: 'dm26ex5-SEC004CHO',
@@ -203,7 +203,7 @@ function main() {
       cost: 3,
       power: '5000',
       race: 'スノーフェアリー',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC003.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC004CHO.jpg',
     },
     {
       id: 'dm26ex5-SEC005CHO',
@@ -215,7 +215,7 @@ function main() {
       cost: 9,
       power: '6000+',
       race: 'アポロニア・ドラゴン/エンジェル・コマンド',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC004.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC005CHO.jpg',
     },
     {
       id: 'dm26ex5-SEC006CHO',
@@ -227,12 +227,16 @@ function main() {
       cost: 7,
       power: '15000',
       race: 'ルナティック・エンペラー/アーマード・ドラゴン/フェニックス',
-      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC005.jpg',
+      image: 'https://dm.takaratomy.co.jp/wp-content/card/cardimage/dm26ex5-SEC006CHO.jpg',
     },
   ];
   const insertChoStmt = db.prepare(`
-    INSERT OR IGNORE INTO cards (id, name, pack, type, civil, rarity, cost, power, race, image)
+    INSERT INTO cards (id, name, pack, type, civil, rarity, cost, power, race, image)
     VALUES (@id, @name, @pack, @type, @civil, @rarity, @cost, @power, @race, @image)
+    ON CONFLICT(id) DO UPDATE SET
+      image = excluded.image,
+      pack = excluded.pack,
+      name = excluded.name
   `);
   for (const c of dm26ex5ChoSec) {
     insertChoStmt.run(c);

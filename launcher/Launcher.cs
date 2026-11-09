@@ -36,11 +36,27 @@ namespace DMVaultLauncher
             this.MaximizeBox = false;
             this.BackColor = Color.FromArgb(15, 23, 42); // slate-900
 
+            try
+            {
+                Icon appIcon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+                if (appIcon != null)
+                {
+                    this.Icon = appIcon;
+                    PictureBox picIcon = new PictureBox();
+                    picIcon.Image = appIcon.ToBitmap();
+                    picIcon.SizeMode = PictureBoxSizeMode.Zoom;
+                    picIcon.Size = new Size(34, 34);
+                    picIcon.Location = new Point(24, 16);
+                    this.Controls.Add(picIcon);
+                }
+            }
+            catch {}
+
             Label lblTitle = new Label();
             lblTitle.Text = "DM Vault デュエマ管理アプリ";
             lblTitle.Font = new Font("Segoe UI", 13, FontStyle.Bold);
             lblTitle.ForeColor = Color.White;
-            lblTitle.Location = new Point(24, 20);
+            lblTitle.Location = new Point(66, 20);
             lblTitle.AutoSize = true;
             this.Controls.Add(lblTitle);
 

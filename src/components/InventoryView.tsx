@@ -15,9 +15,18 @@ import {
   ArrowDown,
   FolderKanban,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { getCivilizationColor } from '@/lib/civilization';
 import { normalizeForSearch } from '@/lib/normalize';
+import {
+  RARITY_CATEGORIES,
+  RARITY_GROUP_ORDER,
+  getRarityRank,
+  getRarityGroupTitle,
+  matchesRarityFilter,
+  getRarityBadgeStyle,
+} from '@/lib/rarity';
 import { StorageItem, InventoryItem } from '@/types';
 
 interface InventoryViewProps {
@@ -29,8 +38,16 @@ interface InventoryViewProps {
   onSelectCardDetail?: (item: InventoryItem) => void;
 }
 
-type SortKey = 'updated_desc' | 'cost_asc' | 'cost_desc' | 'type' | 'count_desc' | 'name_asc';
-type GroupByKey = 'none' | 'type' | 'cost' | 'civil';
+type SortKey =
+  | 'updated_desc'
+  | 'cost_asc'
+  | 'cost_desc'
+  | 'rarity_desc'
+  | 'rarity_asc'
+  | 'type'
+  | 'count_desc'
+  | 'name_asc';
+type GroupByKey = 'none' | 'type' | 'rarity' | 'cost' | 'civil';
 
 export const CARD_TYPE_CATEGORIES = [
   { label: 'すべて', value: 'all' },
@@ -144,6 +161,7 @@ export default function InventoryView({
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedCivil, setSelectedCivil] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedRarity, setSelectedRarity] = useState<string>('all');
   const [selectedCost, setSelectedCost] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortKey>('cost_asc');
   const [groupBy, setGroupBy] = useState<GroupByKey>('none');
@@ -204,6 +222,11 @@ export default function InventoryView({
         return false;
       }
 
+      // レアリティ絞り込み
+      if (selectedRarity !== 'all' && !matchesRarityFilter(selectedRarity, item.card_rarity)) {
+        return false;
+      }
+
       // コスト絞り込み
       if (selectedCost !== 'all') {
         if (item.card_cost === null || item.card_cost === undefined) return false;
@@ -247,6 +270,24 @@ export default function InventoryView({
         if (ca !== cb) return cb - ca;
         return a.card_name.localeCompare(b.card_name, 'ja');
       }
+      if (sortBy === 'rarity_desc') {
+        const ra = getRarityRank(a.card_rarity, a.card_pack);
+        const rb = getRarityRank(b.card_rarity, b.card_pack);
+        if (ra !== rb) return rb - ra;
+        const ca = a.card_cost ?? 9999;
+        const cb = b.card_cost ?? 9999;
+        if (ca !== cb) return ca - cb;
+        return a.card_name.localeCompare(b.card_name, 'ja');
+      }
+      if (sortBy === 'rarity_asc') {
+        const ra = getRarityRank(a.card_rarity, a.card_pack);
+        const rb = getRarityRank(b.card_rarity, b.card_pack);
+        if (ra !== rb) return ra - rb;
+        const ca = a.card_cost ?? 9999;
+        const cb = b.card_cost ?? 9999;
+        if (ca !== cb) return ca - cb;
+        return a.card_name.localeCompare(b.card_name, 'ja');
+      }
       if (sortBy === 'type') {
         const ta = TYPE_GROUP_ORDER.indexOf(getCardTypeCategory(a.card_name, a.card_type));
         const tb = TYPE_GROUP_ORDER.indexOf(getCardTypeCategory(b.card_name, b.card_type));
@@ -268,7 +309,7 @@ export default function InventoryView({
       // updated_desc
       return (b.updated_at || '').localeCompare(a.updated_at || '');
     });
-  }, [items, selectedStorageId, selectedCivil, selectedType, selectedCost, filterQuery, sortBy]);
+  }, [items, selectedStorageId, selectedCivil, selectedType, selectedRarity, selectedCost, filterQuery, sortBy]);
 
   // グループ分け処理
   const groupedSections = useMemo(() => {
@@ -282,6 +323,8 @@ export default function InventoryView({
       let key = '';
       if (groupBy === 'type') {
         key = getCardTypeCategory(item.card_name, item.card_type);
+      } else if (groupBy === 'rarity') {
+        key = getRarityGroupTitle(item.card_rarity);
       } else if (groupBy === 'cost') {
         key = item.card_cost !== null && item.card_cost !== undefined ? `コスト ${item.card_cost}` : 'コストなし';
       } else if (groupBy === 'civil') {
@@ -297,6 +340,12 @@ export default function InventoryView({
 
     if (groupBy === 'type') {
       entries.sort((a, b) => TYPE_GROUP_ORDER.indexOf(a.title) - TYPE_GROUP_ORDER.indexOf(b.title));
+    } else if (groupBy === 'rarity') {
+      entries.sort((a, b) => {
+        const ia = RARITY_GROUP_ORDER.indexOf(a.title);
+        const ib = RARITY_GROUP_ORDER.indexOf(b.title);
+        return sortBy === 'rarity_asc' ? ib - ia : ia - ib;
+      });
     } else if (groupBy === 'cost') {
       entries.sort((a, b) => {
         const na = a.title.startsWith('コスト ') ? parseInt(a.title.replace('コスト ', ''), 10) : 9999;
@@ -310,11 +359,16 @@ export default function InventoryView({
 
   const totalFilteredCards = filteredAndSortedItems.reduce((acc, cur) => acc + cur.count, 0);
   const hasActiveFilters =
-    selectedCivil !== 'all' || selectedType !== 'all' || selectedCost !== 'all' || filterQuery.trim() !== '';
+    selectedCivil !== 'all' ||
+    selectedType !== 'all' ||
+    selectedRarity !== 'all' ||
+    selectedCost !== 'all' ||
+    filterQuery.trim() !== '';
 
   const resetFilters = () => {
     setSelectedCivil('all');
     setSelectedType('all');
+    setSelectedRarity('all');
     setSelectedCost('all');
     setFilterQuery('');
   };
@@ -408,6 +462,27 @@ export default function InventoryView({
             コストが大きい順
           </button>
           <button
+            onClick={() => setSortBy('rarity_desc')}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+              sortBy === 'rarity_desc'
+                ? 'bg-amber-600/30 border-amber-500 text-amber-200 shadow-sm'
+                : 'bg-slate-800/70 border-slate-700/70 text-slate-300 hover:text-white'
+            }`}
+          >
+            <Sparkles className="w-3 h-3 text-amber-400" />
+            レアリティが高い順
+          </button>
+          <button
+            onClick={() => setSortBy('rarity_asc')}
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
+              sortBy === 'rarity_asc'
+                ? 'bg-amber-600/30 border-amber-500 text-amber-200 shadow-sm'
+                : 'bg-slate-800/70 border-slate-700/70 text-slate-300 hover:text-white'
+            }`}
+          >
+            レアリティが低い順
+          </button>
+          <button
             onClick={() => setSortBy('type')}
             className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition border ${
               sortBy === 'type'
@@ -458,6 +533,7 @@ export default function InventoryView({
           {(
             [
               { label: 'なし', value: 'none' },
+              { label: 'レアリティ別', value: 'rarity' },
               { label: 'カードタイプ別', value: 'type' },
               { label: 'コスト別', value: 'cost' },
               { label: '文明別', value: 'civil' },
@@ -497,6 +573,27 @@ export default function InventoryView({
               }`}
             >
               {tf.label}
+            </button>
+          ))}
+        </div>
+
+        {/* レアリティフィルター */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
+            <Sparkles className="w-3 h-3 text-purple-400" />
+            レア度:
+          </span>
+          {RARITY_CATEGORIES.map((rf) => (
+            <button
+              key={rf.value}
+              onClick={() => setSelectedRarity(rf.value)}
+              className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+                selectedRarity === rf.value
+                  ? 'bg-purple-600/30 border-purple-500 text-purple-200'
+                  : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {rf.label}
             </button>
           ))}
         </div>
@@ -632,8 +729,13 @@ export default function InventoryView({
                             )}
 
                             {/* レアリティバッジ */}
-                            {item.card_rarity && (
-                              <div className="absolute bottom-2 right-2 bg-purple-950/90 border border-purple-700 text-purple-200 text-[10px] font-bold px-1.5 py-0.5 rounded shadow">
+                            {item.card_rarity && item.card_rarity !== '-' && (
+                              <div
+                                className={`absolute bottom-2 right-2 border text-[10px] font-bold px-1.5 py-0.5 rounded shadow ${
+                                  getRarityBadgeStyle(item.card_rarity).className
+                                }`}
+                              >
+                                {getRarityBadgeStyle(item.card_rarity).prefix}
                                 {item.card_rarity}
                               </div>
                             )}

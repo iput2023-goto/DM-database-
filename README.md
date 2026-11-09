@@ -39,3 +39,4 @@ npm run dev
   ```bash
   node scripts/sync_card_rubies.js
   ```
+

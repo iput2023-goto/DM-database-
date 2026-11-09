@@ -54,9 +54,11 @@ export default function Header({ totalInventoryCount, uniqueInventoryCount }: He
       <div className="flex flex-wrap items-center justify-between gap-4 max-w-7xl mx-auto">
         {/* ロゴとタイトル */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Layers className="w-5 h-5 text-white" />
-          </div>
+          <img
+            src="/icon.svg"
+            alt="DM Vault"
+            className="w-10 h-10 rounded-xl shadow-lg shadow-indigo-500/20"
+          />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-lg font-bold text-white tracking-wide">

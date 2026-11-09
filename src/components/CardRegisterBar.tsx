@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Check, Box, Loader2, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Search, Plus, Check, Box, Loader2, X, ArrowUp, ArrowDown, Sparkles } from 'lucide-react';
 import { getCivilizationColor } from '@/lib/civilization';
 import { normalizeForSearch } from '@/lib/normalize';
+import { getRarityRank, getRarityBadgeStyle } from '@/lib/rarity';
 import { StorageItem, CardMaster, CardFace } from '@/types';
 import { CARD_TYPE_CATEGORIES, matchesCardTypeFilter } from './InventoryView';
 
@@ -54,7 +55,7 @@ export default function CardRegisterBar({
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [dropdownSort, setDropdownSort] = useState<'relevance' | 'cost_asc' | 'cost_desc'>('relevance');
+  const [dropdownSort, setDropdownSort] = useState<'relevance' | 'cost_asc' | 'cost_desc' | 'rarity_desc'>('relevance');
   const [dropdownTypeFilter, setDropdownTypeFilter] = useState<string>('all');
 
   const displaySuggestions = useMemo(() => {
@@ -66,6 +67,9 @@ export default function CardRegisterBar({
     }
     if (dropdownSort === 'cost_desc') {
       return [...filtered].sort((a, b) => (b.cost ?? -1) - (a.cost ?? -1));
+    }
+    if (dropdownSort === 'rarity_desc') {
+      return [...filtered].sort((a, b) => getRarityRank(b.rarity, b.pack) - getRarityRank(a.rarity, a.pack));
     }
     return filtered;
   }, [suggestions, dropdownSort, dropdownTypeFilter]);
@@ -321,6 +325,18 @@ export default function CardRegisterBar({
                       <ArrowDown className="w-2.5 h-2.5" />
                       コスト大順
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setDropdownSort('rarity_desc')}
+                      className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded border text-[10px] font-semibold transition ${
+                        dropdownSort === 'rarity_desc'
+                          ? 'bg-amber-600/30 border-amber-500 text-amber-200'
+                          : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                      レア度順
+                    </button>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
@@ -386,8 +402,13 @@ export default function CardRegisterBar({
                             Cost {card.cost}
                           </span>
                         )}
-                        {card.rarity && (
-                          <span className="text-[10px] px-1.5 py-0.2 bg-purple-950/60 border border-purple-800/40 text-purple-300 rounded">
+                        {card.rarity && card.rarity !== '-' && (
+                          <span
+                            className={`text-[10px] px-1.5 py-0.2 border rounded font-bold ${
+                              getRarityBadgeStyle(card.rarity).className
+                            }`}
+                          >
+                            {getRarityBadgeStyle(card.rarity).prefix}
                             {card.rarity}
                           </span>
                         )}
