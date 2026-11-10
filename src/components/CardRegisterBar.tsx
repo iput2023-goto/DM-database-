@@ -609,13 +609,15 @@ export default function CardRegisterBar({
             <div className="absolute left-0 right-0 top-full mt-1.5 max-h-96 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 divide-y divide-slate-800">
               {/* 構築済みデッキ一致バナー */}
               {matchedDecks.length > 0 && (
-                <div className="bg-gradient-to-r from-amber-950/80 to-slate-900 p-2.5 border-b border-amber-600/40">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-2">
-                    <Layers className="w-4 h-4 text-amber-400" />
-                    <span>構築済みデッキが見つかりました（タップで全カード一括追加）</span>
+                <div className="bg-gradient-to-r from-amber-950/90 to-slate-900 p-2.5 border-b border-amber-600/40">
+                  <div className="flex items-center justify-between gap-1.5 text-xs font-bold text-amber-300 mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-amber-400" />
+                      <span>構築済みデッキ ({matchedDecks.length}件ヒット - タップで全カード一括追加)</span>
+                    </div>
                   </div>
-                  <div className="space-y-1.5">
-                    {matchedDecks.slice(0, 3).map((deck) => (
+                  <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                    {matchedDecks.map((deck) => (
                       <div
                         key={deck.id}
                         className="flex items-center justify-between gap-3 p-2 bg-slate-900/90 hover:bg-slate-800 border border-amber-500/30 rounded-xl transition"

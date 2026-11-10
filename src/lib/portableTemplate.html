@@ -957,12 +957,12 @@ function onMasterSearch() {
   const matchedDecks = searchDecksByQuery(rawVal);
   let decksHtml = "";
   if (matchedDecks.length > 0) {
-    decksHtml = '<div style="background:linear-gradient(135deg, rgba(120,53,15,0.4), rgba(15,23,42,0.8));padding:10px 12px;border-bottom:1px solid rgba(245,158,11,0.4);">' +
+    decksHtml = '<div style="background:linear-gradient(135deg, rgba(120,53,15,0.7), rgba(15,23,42,0.9));padding:10px 12px;border-bottom:1px solid rgba(245,158,11,0.4);">' +
       '<div style="font-size:11px;font-weight:bold;color:#fcd34d;margin-bottom:6px;display:flex;align-items:center;gap:6px;">' +
-        '<span>📚 構築済みデッキ (' + matchedDecks.length + '件ヒット - タップで全カード一括追加)</span>' +
+        '<span>📚 構築済みデッキ (' + matchedDecks.length + '件ヒット - スクロールで全デッキ選択可能)</span>' +
       '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:6px;">' +
-        matchedDecks.slice(0, 3).map(function(d) {
+      '<div style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;padding-right:2px;">' +
+        matchedDecks.map(function(d) {
           return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0f172a;padding:8px 10px;border-radius:10px;border:1px solid #475569;">' +
             '<div style="min-width:0;flex:1;">' +
               '<div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(d.name) + '</div>' +
