@@ -4,6 +4,7 @@ node_modules/
 # Next.js build output
 .next/
 out/
+.desktop_app_profile/
 
 # SQLite WAL / shared memory files
 *.db-shm

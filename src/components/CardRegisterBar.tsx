@@ -7,6 +7,7 @@ import { normalizeForSearch } from '@/lib/normalize';
 import { getRarityRank, getRarityBadgeStyle } from '@/lib/rarity';
 import { StorageItem, CardMaster, CardFace } from '@/types';
 import { CARD_TYPE_CATEGORIES, matchesCardTypeFilter } from './InventoryView';
+import { searchOfflineCards, localAddInventoryItem } from '@/lib/clientStorage';
 
 /** 検索語が表面ではなく裏面（覚醒面など）の名前・フリガナに一致した場合、その面を返す */
 function findBackFaceHit(card: CardMaster, query: string): CardFace | null {
@@ -285,13 +286,24 @@ export default function CardRegisterBar({
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/cards?q=${encodeURIComponent(query.trim())}&limit=130`);
-        if (res.ok) {
-          const data = await res.json();
-          setSuggestions(data.cards || []);
-          setShowDropdown(true);
-          setSelectedIndex(-1);
+        let cardsResult: CardMaster[] | null = null;
+        try {
+          const res = await fetch(`/api/cards?q=${encodeURIComponent(query.trim())}&limit=130`);
+          if (res.ok) {
+            const data = await res.json();
+            cardsResult = data.cards || [];
+          }
+        } catch {
+          cardsResult = null;
         }
+
+        if (cardsResult === null) {
+          cardsResult = await searchOfflineCards(query.trim(), 130);
+        }
+
+        setSuggestions(cardsResult);
+        setShowDropdown(true);
+        setSelectedIndex(-1);
       } catch (e) {
         console.error(e);
       } finally {
@@ -308,32 +320,40 @@ export default function CardRegisterBar({
 
     setAddingCardId(card.id);
     try {
-      const res = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storage_id: targetStorageId,
-          card_id: card.id,
-          count: addCount,
-          condition,
-          memo,
-        }),
-      });
-
-      if (res.ok) {
-        const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
-        setSuccessToast(`「${card.name}」を ${addCount}枚 追加しました！ (${targetStorageName})`);
-        setTimeout(() => setSuccessToast(null), 3000);
-
-        // 追加済みバッジの更新
-        setRecentAddedMap((prev) => ({
-          ...prev,
-          [card.id]: (prev[card.id] || 0) + addCount,
-        }));
-
-        // インベントリ一覧の再取得（検索結果のドロップダウンは維持）
-        onCardAdded();
+      let addedToServer = false;
+      try {
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storage_id: targetStorageId,
+            card_id: card.id,
+            count: addCount,
+            condition,
+            memo,
+          }),
+        });
+        if (res.ok) addedToServer = true;
+      } catch {
+        addedToServer = false;
       }
+
+      if (!addedToServer) {
+        localAddInventoryItem(targetStorageId, card, addCount, condition, memo);
+      }
+
+      const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
+      setSuccessToast(`「${card.name}」を ${addCount}枚 追加しました！ (${targetStorageName})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+
+      // 追加済みバッジの更新
+      setRecentAddedMap((prev) => ({
+        ...prev,
+        [card.id]: (prev[card.id] || 0) + addCount,
+      }));
+
+      // インベントリ一覧の再取得（検索結果のドロップダウンは維持）
+      onCardAdded();
     } catch (e) {
       console.error(e);
     } finally {
@@ -395,29 +415,37 @@ export default function CardRegisterBar({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storage_id: targetStorageId,
-          card_id: selectedCard.id,
-          count,
-          condition,
-          memo,
-        }),
-      });
-
-      if (res.ok) {
-        const addedCardName = selectedCard.name;
-        const targetStorageName = storages.find(s => s.id === targetStorageId)?.name || 'ストレージ';
-        
-        setSuccessToast(`「${addedCardName}」を ${count}枚 追加しました！ (${targetStorageName})`);
-        setTimeout(() => setSuccessToast(null), 3000);
-
-        // 次の入力に向けてリセット & フォーカス
-        clearSelection();
-        onCardAdded();
+      let addedToServer = false;
+      try {
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storage_id: targetStorageId,
+            card_id: selectedCard.id,
+            count,
+            condition,
+            memo,
+          }),
+        });
+        if (res.ok) addedToServer = true;
+      } catch {
+        addedToServer = false;
       }
+
+      if (!addedToServer) {
+        localAddInventoryItem(targetStorageId, selectedCard, count, condition, memo);
+      }
+
+      const addedCardName = selectedCard.name;
+      const targetStorageName = storages.find(s => s.id === targetStorageId)?.name || 'ストレージ';
+      
+      setSuccessToast(`「${addedCardName}」を ${count}枚 追加しました！ (${targetStorageName})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+
+      // 次の入力に向けてリセット & フォーカス
+      clearSelection();
+      onCardAdded();
     } catch (e) {
       console.error(e);
     } finally {

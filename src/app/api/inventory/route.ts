@@ -113,23 +113,19 @@ export async function POST(request: Request) {
   }
 }
 
-/** ストレージ内のカードを一括全削除 */
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const storageId = searchParams.get('storageId');
-
     const db = getDb();
+
     if (storageId && storageId !== 'all') {
-      const sid = parseInt(storageId, 10);
-      db.prepare('DELETE FROM inventory WHERE storage_id = ?').run(sid);
-      return NextResponse.json({ success: true, clearedStorageId: sid });
-    } else if (storageId === 'all') {
-      db.prepare('DELETE FROM inventory').run();
-      return NextResponse.json({ success: true, clearedAll: true });
+      db.prepare('DELETE FROM inventory WHERE storage_id = ?').run(parseInt(storageId, 10));
     } else {
-      return NextResponse.json({ error: 'storageId を指定してください' }, { status: 400 });
+      db.prepare('DELETE FROM inventory').run();
     }
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
