@@ -67,11 +67,22 @@ export default function Home() {
     }
   };
 
-  // 削除ハンドラー
+  // 削除ハンドラー（個別カード削除）
   const handleDeleteItem = async (id: number) => {
-    if (!confirm('このカードを保管リストから削除しますか？')) return;
     try {
       const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        refreshAll();
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // ストレージ内のカード全削除ハンドラー
+  const handleClearStorage = async (storageId: number | 'all') => {
+    try {
+      const res = await fetch(`/api/inventory?storageId=${storageId}`, { method: 'DELETE' });
       if (res.ok) {
         refreshAll();
       }
@@ -131,6 +142,7 @@ export default function Home() {
             selectedStorageId={selectedStorageId}
             onSelectStorage={setSelectedStorageId}
             onRefresh={refreshAll}
+            onClearStorage={handleClearStorage}
           />
 
           <InventoryView
@@ -139,6 +151,7 @@ export default function Home() {
             selectedStorageId={selectedStorageId}
             onUpdateCount={handleUpdateCount}
             onDeleteItem={handleDeleteItem}
+            onClearStorage={handleClearStorage}
             onSelectCardDetail={openCardModal}
           />
         </div>
