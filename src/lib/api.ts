@@ -18,13 +18,22 @@ async function getNativeDb(): Promise<SQLiteDBConnection> {
   }
 
   try {
-    // assets/databases/dm_cards.db を内部領域にコピー（初回のみ自動実行）
-    await sqliteConnection.copyFromAssets();
+    await sqliteConnection.checkConnectionsConsistency();
+  } catch {
+    try {
+      await sqliteConnection.closeAllConnections();
+    } catch {}
+  }
+
+  // 1. assets/public/assets/databases/dm_cards.db をアプリ内部領域へコピー（初回のみ）
+  try {
+    await sqliteConnection.copyFromAssets(false);
+    console.log('copyFromAssets completed');
   } catch (e) {
     console.warn('copyFromAssets error or already copied:', e);
   }
 
-  // 接続の作成とオープン
+  // 2. 接続の作成または再取得
   const isConn = (await sqliteConnection.isConnection('dm_cards', false)).result;
   if (isConn) {
     dbInstance = await sqliteConnection.retrieveConnection('dm_cards', false);
@@ -39,9 +48,39 @@ async function getNativeDb(): Promise<SQLiteDBConnection> {
   }
 
   if (dbInstance) {
-    await dbInstance.open();
+    const isOpen = (await dbInstance.isDBOpen()).result;
+    if (!isOpen) {
+      await dbInstance.open();
+    }
 
-    // テーブルが存在しない場合のフォールバック作成
+    // 3. cards テーブルの存在と件数を検証
+    let cardCount = 0;
+    try {
+      const countRes = await dbInstance.query('SELECT count(*) as count FROM cards');
+      cardCount = countRes.values?.[0]?.count || 0;
+      console.log('Current DB cards count:', cardCount);
+    } catch (err) {
+      console.warn('cards table query failed, DB might be empty:', err);
+    }
+
+    // もし cards テーブルが存在しないか 0件の場合（空DBが過去に作成されていた場合）
+    // 既存の空DBを破棄し、assets から強制上書きコピー (overwrite: true) して復元
+    if (cardCount === 0) {
+      console.log('Restoring pre-populated dm_cards.db with overwrite...');
+      try {
+        await dbInstance.close();
+        await sqliteConnection.closeConnection('dm_cards', false);
+        await sqliteConnection.copyFromAssets(true);
+        dbInstance = await sqliteConnection.createConnection('dm_cards', false, 'no-encryption', 1, false);
+        await dbInstance.open();
+        const recount = await dbInstance.query('SELECT count(*) as count FROM cards');
+        console.log('Restored DB cards count:', recount.values?.[0]?.count);
+      } catch (restoreErr) {
+        console.error('Failed to restore database from assets:', restoreErr);
+      }
+    }
+
+    // 4. storages, inventory テーブルのフォールバック定義
     await dbInstance.execute(`
       CREATE TABLE IF NOT EXISTS storages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -100,54 +139,66 @@ export const api = {
       return await res.json();
     }
 
-    // Android ネイティブ SQLite
-    const db = await getNativeDb();
-    const q = normalizeForSearch(params.q);
-    const civil = params.civil?.trim() || '';
-    const cost = params.cost;
-    const limit = Math.min(params.limit || 60, 150);
+    try {
+      // Android ネイティブ SQLite
+      const db = await getNativeDb();
+      const q = normalizeForSearch(params.q);
+      const civil = params.civil?.trim() || '';
+      const cost = params.cost;
+      const limit = Math.min(params.limit || 60, 150);
 
-    const conditions: string[] = [];
-    const queryParams: (string | number)[] = [];
+      const conditions: string[] = [];
+      const queryParams: (string | number)[] = [];
 
-    if (q) {
-      conditions.push('search_key LIKE ?');
-      queryParams.push(`%${q}%`);
+      if (q) {
+        conditions.push('search_key LIKE ?');
+        queryParams.push(`%${q}%`);
+      }
+      if (civil && civil !== 'all') {
+        conditions.push('civil LIKE ?');
+        queryParams.push(`%${civil}%`);
+      }
+      if (cost !== null && cost !== undefined && cost !== '' && cost !== 'all') {
+        conditions.push('cost = ?');
+        queryParams.push(parseInt(cost, 10));
+      }
+
+      const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+      
+      let orderByClause = 'cost ASC, id DESC';
+      const sortParams: (string | number)[] = [];
+      if (q) {
+        orderByClause = `
+          CASE
+            WHEN search_key LIKE ? THEN 1
+            WHEN search_key LIKE ? THEN 2
+            ELSE 3
+          END,
+          ${orderByClause}
+        `;
+        sortParams.push(`%|${q}|%`, `%|${q}%`);
+      }
+
+      const sql = `
+        SELECT id, name, name_ruby, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json
+        FROM cards
+        ${whereClause}
+        ORDER BY ${orderByClause}
+        LIMIT ${limit}
+      `;
+
+      const allParams = [...queryParams, ...sortParams];
+      const res = await db.query(sql, allParams.length > 0 ? allParams : undefined);
+      const cards = (res.values || []).map(({ faces_json, ...rest }: any) => ({
+        ...rest,
+        faces: faces_json ? JSON.parse(faces_json) : [],
+      }));
+
+      return { cards };
+    } catch (err: any) {
+      console.error('getCards native error:', err);
+      return { cards: [] };
     }
-    if (civil && civil !== 'all') {
-      conditions.push('civil LIKE ?');
-      queryParams.push(`%${civil}%`);
-    }
-    if (cost !== null && cost !== undefined && cost !== '' && cost !== 'all') {
-      conditions.push('cost = ?');
-      queryParams.push(parseInt(cost, 10));
-    }
-
-    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    const sortParams = q ? [`%|${q}|%`, `%|${q}%`] : ['', ''];
-
-    const sql = `
-      SELECT id, name, name_ruby, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json
-      FROM cards
-      ${whereClause}
-      ORDER BY
-        CASE
-          WHEN search_key LIKE ? THEN 1
-          WHEN search_key LIKE ? THEN 2
-          ELSE 3
-        END,
-        cost ASC,
-        id DESC
-      LIMIT ?
-    `;
-
-    const res = await db.query(sql, [...queryParams, ...sortParams, limit]);
-    const cards = (res.values || []).map(({ faces_json, ...rest }: any) => ({
-      ...rest,
-      faces: faces_json ? JSON.parse(faces_json) : [],
-    }));
-
-    return { cards };
   },
 
   /** ストレージ一覧取得 */
