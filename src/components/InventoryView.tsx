@@ -35,6 +35,7 @@ interface InventoryViewProps {
   selectedStorageId: number | 'all';
   onUpdateCount: (id: number, newCount: number) => void;
   onDeleteItem: (id: number) => void;
+  onClearStorage?: (storageId: number | 'all') => void;
   onSelectCardDetail?: (item: InventoryItem) => void;
 }
 
@@ -156,6 +157,7 @@ export default function InventoryView({
   selectedStorageId,
   onUpdateCount,
   onDeleteItem,
+  onClearStorage,
   onSelectCardDetail,
 }: InventoryViewProps) {
   const [filterQuery, setFilterQuery] = useState('');
@@ -166,6 +168,25 @@ export default function InventoryView({
   const [sortBy, setSortBy] = useState<SortKey>('cost_asc');
   const [groupBy, setGroupBy] = useState<GroupByKey>('none');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+
+  // 削除時の確認ポップアップON/OFF設定（localStorageで永続化）
+  const [confirmDelete, setConfirmDelete] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('dm_vault_confirm_delete');
+      if (saved !== null) return saved === 'true';
+    }
+    return true; // デフォルトは安全のためON
+  });
+
+  const [isClearing, setIsClearing] = useState(false);
+
+  // 確認ポップアップ設定の変更
+  const handleToggleConfirmDelete = (val: boolean) => {
+    setConfirmDelete(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('dm_vault_confirm_delete', String(val));
+    }
+  };
 
   const currentStorage = useMemo(() => {
     if (selectedStorageId === 'all') return null;
@@ -373,6 +394,34 @@ export default function InventoryView({
     setFilterQuery('');
   };
 
+  // 個別カード削除ハンドラー（confirmDelete設定に連動）
+  const handleCardDelete = (item: InventoryItem) => {
+    if (confirmDelete) {
+      if (!confirm(`「${item.card_name}」を保管リストから削除しますか？`)) {
+        return;
+      }
+    }
+    onDeleteItem(item.id);
+  };
+
+  // ストレージ内のカード全削除ハンドラー
+  const handleClearCurrentStorage = async () => {
+    if (!onClearStorage) return;
+
+    const storageName = currentStorage ? `ストレージ「${currentStorage.name}」` : 'すべてのストレージ';
+    const countText = totalFilteredCards > 0 ? `（合計 ${totalFilteredCards}枚）` : '';
+    const confirmMsg = `${storageName} にあるカード${countText}をすべて削除しますか？\n※この操作は取り消せません。`;
+
+    if (!confirm(confirmMsg)) return;
+
+    setIsClearing(true);
+    try {
+      await onClearStorage(selectedStorageId);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
   return (
     <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
       {/* 上部ヘッダー & コントロール */}
@@ -395,9 +444,41 @@ export default function InventoryView({
           )}
         </div>
 
-        {/* 検索・表示切り替え */}
+        {/* 検索・表示切り替え・削除確認設定・全削除 */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative w-48 sm:w-60">
+          {/* 削除確認ポップアップのON/OFF */}
+          <label
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white cursor-pointer select-none transition"
+            title="チェックを外すと、カードのゴミ箱アイコンを押した際に確認ポップアップを出さず直接削除します"
+          >
+            <input
+              type="checkbox"
+              checked={confirmDelete}
+              onChange={(e) => handleToggleConfirmDelete(e.target.checked)}
+              className="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer"
+            />
+            <span>削除時の確認</span>
+          </label>
+
+          {/* ストレージ内カード全削除ボタン */}
+          {onClearStorage && (
+            <button
+              type="button"
+              disabled={filteredAndSortedItems.length === 0 || isClearing}
+              onClick={handleClearCurrentStorage}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/50 hover:border-red-700 text-[11px] font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+              title={
+                currentStorage
+                  ? `「${currentStorage.name}」内のカードをすべて削除`
+                  : 'すべての保管カードを一括全削除'
+              }
+            >
+              <Trash2 className="w-3.5 h-3.5 text-red-400" />
+              <span>{currentStorage ? 'このストレージを空にする' : '全カードを削除'}</span>
+            </button>
+          )}
+
+          <div className="relative w-44 sm:w-56">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
@@ -789,7 +870,7 @@ export default function InventoryView({
                               </div>
 
                               <button
-                                onClick={() => onDeleteItem(item.id)}
+                                onClick={() => handleCardDelete(item)}
                                 className="p-1 text-slate-500 hover:text-red-400 transition"
                                 title="保管から削除"
                               >
@@ -879,8 +960,9 @@ export default function InventoryView({
                               </td>
                               <td className="py-2 px-2 text-right">
                                 <button
-                                  onClick={() => onDeleteItem(item.id)}
+                                  onClick={() => handleCardDelete(item)}
                                   className="p-1 text-slate-500 hover:text-red-400 transition"
+                                  title="保管から削除"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
