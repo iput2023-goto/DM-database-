@@ -6,9 +6,15 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "sync-cards": "node scripts/sync_all_cards.js"
+    "sync-cards": "node scripts/sync_all_cards.js",
+    "build:android": "node scripts/build_android.js",
+    "open:android": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.1",
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0",
     "better-sqlite3": "^11.8.1",
     "lucide-react": "^1.16.0",
     "next": "^15.1.0",
@@ -26,4 +32,3 @@
     "typescript": "^5.7.2"
   }
 }
-

@@ -8,6 +8,7 @@ import InventoryView from '@/components/InventoryView';
 import { X, ExternalLink } from 'lucide-react';
 import { getCivilizationColor } from '@/lib/civilization';
 import { StorageItem, InventoryItem, CardFace } from '@/types';
+import { api } from '@/lib/api';
 
 export default function Home() {
   const [storages, setStorages] = useState<StorageItem[]>([]);
@@ -19,11 +20,8 @@ export default function Home() {
   // ストレージ一覧取得
   const loadStorages = useCallback(async () => {
     try {
-      const res = await fetch('/api/storages');
-      if (res.ok) {
-        const data = await res.json();
-        setStorages(data.storages || []);
-      }
+      const data = await api.getStorages();
+      setStorages(data.storages || []);
     } catch (e) {
       console.error(e);
     }
@@ -32,11 +30,8 @@ export default function Home() {
   // 保管中カード一覧取得
   const loadInventory = useCallback(async () => {
     try {
-      const res = await fetch('/api/inventory');
-      if (res.ok) {
-        const data = await res.json();
-        setInventory(data.items || []);
-      }
+      const data = await api.getInventory();
+      setInventory(data.items || []);
     } catch (e) {
       console.error(e);
     }
@@ -54,14 +49,8 @@ export default function Home() {
   // 枚数更新ハンドラー
   const handleUpdateCount = async (id: number, newCount: number) => {
     try {
-      const res = await fetch(`/api/inventory/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ count: newCount }),
-      });
-      if (res.ok) {
-        refreshAll();
-      }
+      await api.updateInventoryCount(id, newCount);
+      refreshAll();
     } catch (e) {
       console.error(e);
     }
@@ -70,10 +59,8 @@ export default function Home() {
   // 削除ハンドラー（個別カード削除）
   const handleDeleteItem = async (id: number) => {
     try {
-      const res = await fetch(`/api/inventory/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        refreshAll();
-      }
+      await api.deleteInventoryItem(id);
+      refreshAll();
     } catch (e) {
       console.error(e);
     }
@@ -82,10 +69,8 @@ export default function Home() {
   // ストレージ内のカード全削除ハンドラー
   const handleClearStorage = async (storageId: number | 'all') => {
     try {
-      const res = await fetch(`/api/inventory?storageId=${storageId}`, { method: 'DELETE' });
-      if (res.ok) {
-        refreshAll();
-      }
+      await api.clearStorage(storageId);
+      refreshAll();
     } catch (e) {
       console.error(e);
     }

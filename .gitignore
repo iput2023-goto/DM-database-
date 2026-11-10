@@ -16,3 +16,10 @@ out/
 Thumbs.db
 *.log
 
+# Android local & builds
+android/local.properties
+android/.gradle/
+android/app/build/
+android/build/
+*.apk
+

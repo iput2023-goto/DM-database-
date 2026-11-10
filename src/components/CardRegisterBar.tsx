@@ -7,6 +7,7 @@ import { normalizeForSearch } from '@/lib/normalize';
 import { getRarityRank, getRarityBadgeStyle } from '@/lib/rarity';
 import { StorageItem, CardMaster, CardFace } from '@/types';
 import { CARD_TYPE_CATEGORIES, matchesCardTypeFilter } from './InventoryView';
+import { api } from '@/lib/api';
 
 /** 検索語が表面ではなく裏面（覚醒面など）の名前・フリガナに一致した場合、その面を返す */
 function findBackFaceHit(card: CardMaster, query: string): CardFace | null {
@@ -285,13 +286,10 @@ export default function CardRegisterBar({
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const res = await fetch(`/api/cards?q=${encodeURIComponent(query.trim())}&limit=130`);
-        if (res.ok) {
-          const data = await res.json();
-          setSuggestions(data.cards || []);
-          setShowDropdown(true);
-          setSelectedIndex(-1);
-        }
+        const data = await api.getCards({ q: query.trim(), limit: 130 });
+        setSuggestions(data.cards || []);
+        setShowDropdown(true);
+        setSelectedIndex(-1);
       } catch (e) {
         console.error(e);
       } finally {
@@ -308,19 +306,15 @@ export default function CardRegisterBar({
 
     setAddingCardId(card.id);
     try {
-      const res = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storage_id: targetStorageId,
-          card_id: card.id,
-          count: addCount,
-          condition,
-          memo,
-        }),
+      const res = await api.addInventory({
+        storage_id: targetStorageId,
+        card_id: card.id,
+        count: addCount,
+        condition,
+        memo,
       });
 
-      if (res.ok) {
+      if (res.success) {
         const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
         setSuccessToast(`「${card.name}」を ${addCount}枚 追加しました！ (${targetStorageName})`);
         setTimeout(() => setSuccessToast(null), 3000);
@@ -395,21 +389,17 @@ export default function CardRegisterBar({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          storage_id: targetStorageId,
-          card_id: selectedCard.id,
-          count,
-          condition,
-          memo,
-        }),
+      const res = await api.addInventory({
+        storage_id: targetStorageId,
+        card_id: selectedCard.id,
+        count,
+        condition,
+        memo,
       });
 
-      if (res.ok) {
+      if (res.success) {
         const addedCardName = selectedCard.name;
-        const targetStorageName = storages.find(s => s.id === targetStorageId)?.name || 'ストレージ';
+        const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
         
         setSuccessToast(`「${addedCardName}」を ${count}枚 追加しました！ (${targetStorageName})`);
         setTimeout(() => setSuccessToast(null), 3000);

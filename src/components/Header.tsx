@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Database, RefreshCw, Box, Layers, CheckCircle2, AlertCircle } from 'lucide-react';
+import { api } from '@/lib/api';
 
 interface SyncData {
   dbCardsCount: number;
@@ -23,11 +24,15 @@ export default function Header({ totalInventoryCount, uniqueInventoryCount }: He
 
   const fetchSyncStatus = async () => {
     try {
-      const res = await fetch('/api/sync');
-      if (res.ok) {
-        const data = await res.json();
-        setSync(data);
-      }
+      const data = await api.getSyncStatus();
+      setSync({
+        dbCardsCount: data.dbCardsCount,
+        isSyncing: data.isSyncing,
+        totalIdsFound: data.dbCardsCount,
+        progressPercent: 100,
+        lastSyncCompletedAt: null,
+        error: null,
+      });
     } catch (e) {
       console.error(e);
     }
@@ -35,14 +40,13 @@ export default function Header({ totalInventoryCount, uniqueInventoryCount }: He
 
   useEffect(() => {
     fetchSyncStatus();
-    const interval = setInterval(fetchSyncStatus, 3000);
+    const interval = setInterval(fetchSyncStatus, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const triggerSync = async () => {
     setIsRefreshing(true);
     try {
-      await fetch('/api/sync', { method: 'POST' });
       await fetchSyncStatus();
     } finally {
       setIsRefreshing(false);

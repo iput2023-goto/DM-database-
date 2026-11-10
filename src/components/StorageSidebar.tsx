@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Box, Plus, Trash2, Edit2, Layers, Folder, ChevronRight, X, RotateCcw } from 'lucide-react';
 import { StorageItem } from '@/types';
+import { api } from '@/lib/api';
 
 interface StorageSidebarProps {
   storages: StorageItem[];
@@ -42,17 +43,13 @@ export default function StorageSidebar({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/storages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newName.trim(),
-          color: newColor,
-          memo: newMemo.trim(),
-        }),
+      const res = await api.createStorage({
+        name: newName.trim(),
+        color: newColor,
+        memo: newMemo.trim(),
       });
 
-      if (res.ok) {
+      if (res.success) {
         setNewName('');
         setNewMemo('');
         setShowAddModal(false);
@@ -72,8 +69,8 @@ export default function StorageSidebar({
     }
 
     try {
-      const res = await fetch(`/api/storages/${id}`, { method: 'DELETE' });
-      if (res.ok) {
+      const res = await api.deleteStorage(id);
+      if (res.success) {
         if (selectedStorageId === id) {
           onSelectStorage('all');
         }

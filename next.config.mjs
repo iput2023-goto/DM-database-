@@ -1,7 +1,10 @@
 /** @type {import('next').NextConfig} */
+const isExport = process.env.NEXT_EXPORT === 'true';
+
 const nextConfig = {
-  serverExternalPackages: ['better-sqlite3'],
+  ...(isExport ? { output: 'export' } : { serverExternalPackages: ['better-sqlite3'] }),
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
