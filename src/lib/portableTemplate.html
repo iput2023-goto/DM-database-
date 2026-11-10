@@ -271,9 +271,14 @@
             <span>📦 保管中のカード一覧</span>
             <span id="filteredSummaryBadge" style="font-size:11px;font-weight:600;color:#94a3b8;background:#1e293b;padding:2px 8px;border-radius:999px;">0枚</span>
           </div>
-          <button class="btn" id="btnClearStorage" onclick="clearStorageCards(selectedStorageId)" style="background:rgba(127,29,29,0.5);border-color:#b91c1c;color:#fca5a5;padding:5px 10px;font-size:11px;">
-            🗑 全削除
-          </button>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button class="btn" id="btnToggleConfirmDelete" onclick="toggleConfirmDelete()" style="background:rgba(16,185,129,0.2);border-color:#10b981;color:#6ee7b7;padding:5px 10px;font-size:11px;">
+              ⚡ 削除確認: OFF (即削除)
+            </button>
+            <button class="btn" id="btnClearStorage" onclick="clearStorageCards(selectedStorageId)" style="background:rgba(127,29,29,0.5);border-color:#b91c1c;color:#fca5a5;padding:5px 10px;font-size:11px;">
+              🗑 全削除
+            </button>
+          </div>
         </div>
 
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
@@ -411,8 +416,13 @@ const INITIAL_DATA = __INITIAL_DATA_JSON__;
 const CARDS_GZIP_B64 = "__CARDS_GZIP_B64__";
 const LS_KEY = "dm_vault_portable_state_v1";
 const LS_PC_HOST_KEY = "dm_vault_pc_host_v1";
+const LS_CONFIRM_DELETE_KEY = "dm_vault_confirm_delete_v2";
 
 let state = loadState();
+let confirmDelete = false;
+try {
+  confirmDelete = localStorage.getItem(LS_CONFIRM_DELETE_KEY) === "true";
+} catch (e) {}
 let selectedStorageId = "all";
 let selectedCivil = "all";
 let selectedType = "all";
@@ -739,12 +749,35 @@ function renderInventory() {
   }).join("");
 }
 
+function renderConfirmDeleteBtn() {
+  const btn = document.getElementById("btnToggleConfirmDelete");
+  if (!btn) return;
+  if (confirmDelete) {
+    btn.textContent = "🔔 削除確認: ON";
+    btn.style.background = "#1e293b";
+    btn.style.borderColor = "#475569";
+    btn.style.color = "#cbd5e1";
+  } else {
+    btn.textContent = "⚡ 削除確認: OFF (即削除)";
+    btn.style.background = "rgba(16,185,129,0.2)";
+    btn.style.borderColor = "#10b981";
+    btn.style.color = "#6ee7b7";
+  }
+}
+
+function toggleConfirmDelete() {
+  confirmDelete = !confirmDelete;
+  try { localStorage.setItem(LS_CONFIRM_DELETE_KEY, String(confirmDelete)); } catch (e) {}
+  renderConfirmDeleteBtn();
+  showToast(confirmDelete ? "削除時に確認メッセージを表示します" : "⚡ 確認なしで即削除するモードにしました");
+}
+
 function changeCount(id, delta) {
   const idx = state.inventory.findIndex(function(i) { return i.id === id; });
   if (idx < 0) return;
   const next = state.inventory[idx].count + delta;
   if (next <= 0) {
-    if (!confirm("枚数が0になります。削除しますか？")) return;
+    if (confirmDelete && !confirm("枚数が0になります。削除しますか？")) return;
     state.inventory.splice(idx, 1);
   } else {
     state.inventory[idx].count = next;
@@ -756,11 +789,12 @@ function changeCount(id, delta) {
 }
 
 function removeCard(id) {
-  if (!confirm("このカードを保管リストから削除しますか？")) return;
+  if (confirmDelete && !confirm("このカードを保管リストから削除しますか？")) return;
   state.inventory = state.inventory.filter(function(i) { return i.id !== id; });
   saveState();
   renderStorageStrip();
   renderInventory();
+  showToast("カードを削除しました");
 }
 
 function clearStorageCards(targetId) {
@@ -774,11 +808,12 @@ function clearStorageCards(targetId) {
     return showToast("削除するカードがありません");
   }
 
-  const msg = targetStorage
-    ? "ストレージ「" + targetStorage.name + "」内のすべてのカード（" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）"
-    : "すべてのストレージ内の保管カード（合計" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）";
-
-  if (!confirm(msg)) return;
+  if (confirmDelete) {
+    const msg = targetStorage
+      ? "ストレージ「" + targetStorage.name + "」内のすべてのカード（" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）"
+      : "すべてのストレージ内の保管カード（合計" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）";
+    if (!confirm(msg)) return;
+  }
 
   if (isAll) {
     state.inventory = [];
@@ -1004,7 +1039,7 @@ function createStorage() {
 function deleteStorage(id) {
   const s = state.storages.find(function(x) { return x.id === id; });
   if (!s) return;
-  if (!confirm("ストレージ「" + s.name + "」とその中のカードを削除しますか？")) return;
+  if (confirmDelete && !confirm("ストレージ「" + s.name + "」とその中のカードを削除しますか？")) return;
   state.storages = state.storages.filter(function(x) { return x.id !== id; });
   state.inventory = state.inventory.filter(function(i) { return i.storage_id !== id; });
   if (selectedStorageId === id) selectedStorageId = "all";
@@ -1203,6 +1238,7 @@ window.__handleAndroidBack = function() {
   return false;
 };
 
+renderConfirmDeleteBtn();
 updateHeaderStats();
 renderStorageStrip();
 renderFilterBars();

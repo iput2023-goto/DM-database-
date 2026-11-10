@@ -170,19 +170,19 @@ export default function InventoryView({
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
   const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
 
-  // 削除時の確認ポップアップON/OFF設定（localStorageで永続化）
+  // 削除時の確認ポップアップON/OFF設定（localStorageで永続化、デフォルトは確認なし即削除モード）
   const [confirmDelete, setConfirmDelete] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dm_vault_confirm_delete');
+      const saved = localStorage.getItem('dm_vault_confirm_delete_v2');
       if (saved !== null) return saved === 'true';
     }
-    return true;
+    return false;
   });
 
   const handleToggleConfirmDelete = (val: boolean) => {
     setConfirmDelete(val);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('dm_vault_confirm_delete', String(val));
+      localStorage.setItem('dm_vault_confirm_delete_v2', String(val));
     }
   };
 
@@ -425,18 +425,18 @@ export default function InventoryView({
 
         {/* 検索・表示切り替え */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <label
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white cursor-pointer select-none transition"
-            title="チェックを外すと、カードのゴミ箱アイコンを押した際に確認ポップアップを出さず直接削除します"
+          <button
+            type="button"
+            onClick={() => handleToggleConfirmDelete(!confirmDelete)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+              confirmDelete
+                ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                : 'bg-emerald-950/60 hover:bg-emerald-900/70 border-emerald-600/70 text-emerald-300 hover:text-white'
+            }`}
+            title="クリックで削除時の確認メッセージ表示（ON / OFF）を切り替えます"
           >
-            <input
-              type="checkbox"
-              checked={confirmDelete}
-              onChange={(e) => handleToggleConfirmDelete(e.target.checked)}
-              className="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer"
-            />
-            <span>削除時の確認</span>
-          </label>
+            <span>{confirmDelete ? '🔔 削除確認: ON' : '⚡ 削除確認: OFF (即削除)'}</span>
+          </button>
 
           <div className="relative w-44 sm:w-56">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />

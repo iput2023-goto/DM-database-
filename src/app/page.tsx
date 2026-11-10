@@ -140,12 +140,18 @@ export default function Home() {
 
   // ストレージ内カードの全削除（一括削除）ハンドラー
   const handleClearStorageCards = async (storageId: number | 'all') => {
-    const targetStorage = storageId === 'all' ? null : storages.find((s) => s.id === storageId);
-    const confirmMsg = targetStorage
-      ? `ストレージ「${targetStorage.name}」内のすべてのカード（${targetStorage.total_cards}枚）を一括削除しますか？\n（※ストレージ自体は残ります）`
-      : `すべてのストレージ内の保管カード（合計${totalCards}枚）を一括削除しますか？\n（※ストレージ自体は残ります）`;
+    const needConfirm =
+      typeof window !== 'undefined' &&
+      localStorage.getItem('dm_vault_confirm_delete_v2') === 'true';
 
-    if (!confirm(confirmMsg)) return;
+    if (needConfirm) {
+      const targetStorage = storageId === 'all' ? null : storages.find((s) => s.id === storageId);
+      const confirmMsg = targetStorage
+        ? `ストレージ「${targetStorage.name}」内のすべてのカード（${targetStorage.total_cards}枚）を一括削除しますか？\n（※ストレージ自体は残ります）`
+        : `すべてのストレージ内の保管カード（合計${totalCards}枚）を一括削除しますか？\n（※ストレージ自体は残ります）`;
+
+      if (!confirm(confirmMsg)) return;
+    }
 
     try {
       let clearedOnServer = false;

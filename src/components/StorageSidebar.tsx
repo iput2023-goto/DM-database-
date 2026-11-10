@@ -76,8 +76,13 @@ export default function StorageSidebar({
 
   const handleDeleteStorage = async (id: number, name: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm(`ストレージ「${name}」を削除してもよろしいですか？\n（※中のカードデータも削除されます）`)) {
-      return;
+    const needConfirm =
+      typeof window !== 'undefined' &&
+      localStorage.getItem('dm_vault_confirm_delete_v2') === 'true';
+    if (needConfirm) {
+      if (!confirm(`ストレージ「${name}」を削除してもよろしいですか？\n（※中のカードデータも削除されます）`)) {
+        return;
+      }
     }
 
     try {
