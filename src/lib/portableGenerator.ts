@@ -83,8 +83,12 @@ export function generatePortableHtml(): string {
   const templatePath = path.join(process.cwd(), 'src', 'lib', 'portableTemplate.html');
   const template = fs.readFileSync(templatePath, 'utf8');
 
+  const decksPath = path.join(process.cwd(), 'src', 'lib', 'preconstructedDecks.json');
+  const decksJson = fs.existsSync(decksPath) ? fs.readFileSync(decksPath, 'utf8') : '[]';
+
   return template
     .replace('__IMAGE_PREFIX_JSON__', () => JSON.stringify(IMAGE_PREFIX))
     .replace('__INITIAL_DATA_JSON__', () => initialDataJson)
-    .replace('__CARDS_GZIP_B64__', () => cardsGzipBase64);
+    .replace('__CARDS_GZIP_B64__', () => cardsGzipBase64)
+    .replace('__DECKS_JSON__', () => decksJson);
 }

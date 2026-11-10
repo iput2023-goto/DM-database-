@@ -413,6 +413,92 @@ export function createLocalBackupObject(): BackupData {
   };
 }
 
+import preconstructedDecks from './preconstructedDecks.json';
+
+export interface PreconstructedDeck {
+  id: string;
+  code: string;
+  name: string;
+  aliases: string[];
+  totalCards: number;
+  uniqueCards: number;
+  cards: Array<{ id: string; name: string; count: number }>;
+}
+
+export function searchDecksByQuery(query: string): PreconstructedDeck[] {
+  const q = normalizeForSearch(query);
+  if (!q) return [];
+  const results: PreconstructedDeck[] = [];
+  for (const deck of preconstructedDecks as PreconstructedDeck[]) {
+    const matched =
+      normalizeForSearch(deck.name).includes(q) ||
+      normalizeForSearch(deck.code).includes(q) ||
+      deck.aliases.some((alias) => normalizeForSearch(alias).includes(q));
+    if (matched) {
+      results.push(deck);
+    }
+  }
+  return results;
+}
+
+export function localAddDeckToStorage(
+  storageId: number,
+  deck: PreconstructedDeck
+): { addedCount: number; typesCount: number } {
+  const storages = getCachedStorages();
+  const targetStorage = storages.find((s) => s.id === storageId) || storages[0];
+  if (!targetStorage) throw new Error('ストレージが存在しません');
+
+  const currentInventory = [...getCachedInventory()];
+  const allCards = memoryCardsCache || [];
+  let addedCount = 0;
+  const now = new Date().toISOString();
+
+  for (const deckCard of deck.cards) {
+    const cardMaster = allCards.find((c) => c.id === deckCard.id);
+    const existingIdx = currentInventory.findIndex(
+      (i) => i.storage_id === targetStorage.id && i.card_id === deckCard.id && i.condition === 'プレイ用'
+    );
+
+    if (existingIdx >= 0) {
+      currentInventory[existingIdx] = {
+        ...currentInventory[existingIdx],
+        count: currentInventory[existingIdx].count + deckCard.count,
+        updated_at: now,
+      };
+    } else {
+      const newId = currentInventory.reduce((max, i) => Math.max(max, i.id), 0) + 1;
+      currentInventory.push({
+        id: newId,
+        storage_id: targetStorage.id,
+        storage_name: targetStorage.name,
+        storage_color: targetStorage.color,
+        card_id: deckCard.id,
+        card_name: cardMaster?.name || deckCard.name,
+        card_ruby: cardMaster?.name_ruby || null,
+        card_pack: cardMaster?.pack || '',
+        card_type: cardMaster?.type || '',
+        card_civil: cardMaster?.civil || '',
+        card_rarity: cardMaster?.rarity || '',
+        card_cost: cardMaster?.cost ?? null,
+        card_power: cardMaster?.power || '',
+        card_race: cardMaster?.race || '',
+        card_image: cardMaster?.image || '',
+        card_alt_names: cardMaster?.alt_names || null,
+        card_faces_json: cardMaster?.faces ? JSON.stringify(cardMaster.faces) : null,
+        count: deckCard.count,
+        condition: 'プレイ用',
+        memo: `構築済みデッキ [${deck.name}]`,
+        updated_at: now,
+      });
+    }
+    addedCount += deckCard.count;
+  }
+
+  saveStoragesAndInventoryToCache(storages, currentInventory, true);
+  return { addedCount, typesCount: deck.cards.length };
+}
+
 export function importBackupToLocal(data: BackupData, mode: 'replace' | 'merge'): void {
   if (!data || !Array.isArray(data.storages) || !Array.isArray(data.inventory)) {
     throw new Error('バックアップデータの形式が正しくありません');

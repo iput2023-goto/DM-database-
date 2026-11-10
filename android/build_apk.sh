@@ -48,17 +48,20 @@ javac -encoding UTF-8 --release 8 \
 "$BUILD_TOOLS/zipalign" -f -p 4 "$BUILD_DIR/unaligned.apk" "$BUILD_DIR/aligned.apk"
 
 # 7. Sign APK
-KEYSTORE="$BUILD_DIR/release.keystore"
-keytool -genkeypair \
-  -v \
-  -keystore "$KEYSTORE" \
-  -alias dmvault \
-  -keyalg RSA \
-  -keysize 2048 \
-  -validity 10000 \
-  -storepass dmvault123 \
-  -keypass dmvault123 \
-  -dname "CN=DM Vault, OU=App, O=DMVault, L=Tokyo, S=Tokyo, C=JP"
+KEYSTORE="$ANDROID_DIR/release.keystore"
+if [ ! -f "$KEYSTORE" ]; then
+  echo "Generating persistent keystore at $KEYSTORE"
+  keytool -genkeypair \
+    -v \
+    -keystore "$KEYSTORE" \
+    -alias dmvault \
+    -keyalg RSA \
+    -keysize 2048 \
+    -validity 10000 \
+    -storepass dmvault123 \
+    -keypass dmvault123 \
+    -dname "CN=DM Vault, OU=App, O=DMVault, L=Tokyo, S=Tokyo, C=JP"
+fi
 
 "$BUILD_TOOLS/apksigner" sign \
   --ks "$KEYSTORE" \

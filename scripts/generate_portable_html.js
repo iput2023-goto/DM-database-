@@ -83,11 +83,14 @@ const initialDataJson = JSON.stringify({
 }).replace(/</g, '\\u003c');
 
 const template = fs.readFileSync(TEMPLATE_PATH, 'utf8');
+const DECKS_PATH = path.join(__dirname, '..', 'src', 'lib', 'preconstructedDecks.json');
+const decksJson = fs.existsSync(DECKS_PATH) ? fs.readFileSync(DECKS_PATH, 'utf8') : '[]';
 
 const html = template
   .replace('__IMAGE_PREFIX_JSON__', () => JSON.stringify(IMAGE_PREFIX))
   .replace('__INITIAL_DATA_JSON__', () => initialDataJson)
-  .replace('__CARDS_GZIP_B64__', () => cardsGzipBase64);
+  .replace('__CARDS_GZIP_B64__', () => cardsGzipBase64)
+  .replace('__DECKS_JSON__', () => decksJson);
 
 fs.writeFileSync(OUT_PATH, html, 'utf8');
 const ANDROID_ASSETS_DIR = path.join(__dirname, '..', 'android', 'assets');

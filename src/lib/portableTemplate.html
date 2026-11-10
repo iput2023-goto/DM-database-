@@ -414,6 +414,7 @@
 const IMAGE_PREFIX = __IMAGE_PREFIX_JSON__;
 const INITIAL_DATA = __INITIAL_DATA_JSON__;
 const CARDS_GZIP_B64 = "__CARDS_GZIP_B64__";
+const PRECONSTRUCTED_DECKS = __DECKS_JSON__;
 const LS_KEY = "dm_vault_portable_state_v1";
 const LS_PC_HOST_KEY = "dm_vault_pc_host_v1";
 const LS_CONFIRM_DELETE_KEY = "dm_vault_confirm_delete_v2";
@@ -860,6 +861,80 @@ function onMasterKeyDown(e) {
   }
 }
 
+function searchDecksByQuery(rawQuery) {
+  const q = normalize(rawQuery);
+  if (!q) return [];
+  const results = [];
+  for (let i = 0; i < PRECONSTRUCTED_DECKS.length; i++) {
+    const d = PRECONSTRUCTED_DECKS[i];
+    let hit = normalize(d.name).includes(q) || normalize(d.code).includes(q);
+    if (!hit && d.aliases) {
+      for (let j = 0; j < d.aliases.length; j++) {
+        if (normalize(d.aliases[j]).includes(q)) {
+          hit = true;
+          break;
+        }
+      }
+    }
+    if (hit) results.push(d);
+  }
+  return results;
+}
+
+function addDeckCards(deckId) {
+  const deck = PRECONSTRUCTED_DECKS.find(function(d) { return d.id === deckId; });
+  if (!deck) return;
+  const storageId = parseInt(document.getElementById("addTargetStorage").value, 10) || (state.storages[0] && state.storages[0].id) || 1;
+  const storage = state.storages.find(function(s) { return s.id === storageId; }) || state.storages[0];
+  const now = new Date().toISOString();
+
+  let addedTotal = 0;
+  for (let i = 0; i < deck.cards.length; i++) {
+    const dc = deck.cards[i];
+    const cardMaster = allCards.find(function(c) { return c.id === dc.id; });
+    const existing = state.inventory.find(function(item) {
+      return item.storage_id === storage.id && item.card_id === dc.id;
+    });
+
+    if (existing) {
+      existing.count += dc.count;
+      existing.updated_at = now;
+    } else {
+      const nextId = state.inventory.reduce(function(m, it) { return Math.max(m, it.id || 0); }, 0) + 1;
+      state.inventory.unshift({
+        id: nextId,
+        storage_id: storage.id,
+        storage_name: storage.name,
+        storage_color: storage.color,
+        card_id: dc.id,
+        card_name: cardMaster ? cardMaster.name : dc.name,
+        card_ruby: cardMaster ? (cardMaster.name_ruby || null) : null,
+        card_pack: cardMaster ? (cardMaster.pack || "") : "",
+        card_type: cardMaster ? (cardMaster.type || "") : "",
+        card_civil: cardMaster ? (cardMaster.civil || "") : "",
+        card_rarity: cardMaster ? (cardMaster.rarity || "") : "",
+        card_cost: cardMaster ? cardMaster.cost : null,
+        card_power: cardMaster ? (cardMaster.power || "") : "",
+        card_race: cardMaster ? (cardMaster.race || "") : "",
+        card_image: cardMaster ? (cardMaster.image || "") : "",
+        card_alt_names: cardMaster ? (cardMaster.alt_names || null) : null,
+        card_faces_json: cardMaster ? (cardMaster.faces_json || null) : null,
+        count: dc.count,
+        condition: "プレイ用",
+        memo: "構築済みデッキ [" + deck.name + "]",
+        updated_at: now
+      });
+    }
+    addedTotal += dc.count;
+  }
+
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+  clearMasterSearch();
+  showToast("構築済みデッキ「" + deck.name + "」(" + addedTotal + "枚) を一括追加しました！");
+}
+
 function onMasterSearch() {
   const rawVal = document.getElementById("masterSearchInput").value;
   const q = normalize(rawVal);
@@ -879,14 +954,37 @@ function onMasterSearch() {
     return;
   }
 
+  const matchedDecks = searchDecksByQuery(rawVal);
+  let decksHtml = "";
+  if (matchedDecks.length > 0) {
+    decksHtml = '<div style="background:linear-gradient(135deg, rgba(120,53,15,0.4), rgba(15,23,42,0.8));padding:10px 12px;border-bottom:1px solid rgba(245,158,11,0.4);">' +
+      '<div style="font-size:11px;font-weight:bold;color:#fcd34d;margin-bottom:6px;display:flex;align-items:center;gap:6px;">' +
+        '<span>📚 構築済みデッキ (' + matchedDecks.length + '件ヒット - タップで全カード一括追加)</span>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:6px;">' +
+        matchedDecks.slice(0, 3).map(function(d) {
+          return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0f172a;padding:8px 10px;border-radius:10px;border:1px solid #475569;">' +
+            '<div style="min-width:0;flex:1;">' +
+              '<div style="font-size:12px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(d.name) + '</div>' +
+              '<div style="font-size:10px;color:#94a3b8;font-family:monospace;">' + escapeHtml(d.code) + ' • ' + d.uniqueCards + '種 / 計' + d.totalCards + '枚</div>' +
+            '</div>' +
+            '<button class="btn btn-primary" onclick="addDeckCards(\'' + d.id + '\')" style="background:#f59e0b;color:#020617;font-weight:800;border:none;padding:6px 10px;font-size:11px;flex-shrink:0;">' +
+              '一括追加 (' + d.totalCards + '枚)' +
+            '</button>' +
+          '</div>';
+        }).join("") +
+      '</div>' +
+    '</div>';
+  }
+
   const matches = searchAllCardsByQuery(rawVal, 80);
-  if (matches.length === 0) {
-    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#64748b;font-size:12px;">「' + escapeHtml(rawVal) + '」に一致するカードが見つかりません</div>';
+  if (matches.length === 0 && matchedDecks.length === 0) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#64748b;font-size:12px;">「' + escapeHtml(rawVal) + '」に一致するカードまたは構築済みデッキが見つかりません</div>';
     return;
   }
 
   const selCount = parseInt(document.getElementById("addCountSelect").value, 10) || 1;
-  listEl.innerHTML = matches.map(function(c) {
+  const cardsHtml = matches.map(function(c) {
     const recent = recentAddedCounts[c.id] || 0;
     return '<div class="suggest-item">' +
       '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;" onclick="addMasterCard(\'' + c.id + '\', null)">' +
@@ -909,6 +1007,8 @@ function onMasterSearch() {
       '</div>' +
     '</div>';
   }).join("");
+
+  listEl.innerHTML = decksHtml + cardsHtml;
 }
 
 function openBigSearchModal() {

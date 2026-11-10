@@ -75,13 +75,52 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const db = getDb();
+
+    // 複数カードの一括登録 (構築済みデッキ追加など)
+    if (Array.isArray(body.items)) {
+      const storage_id = body.storage_id;
+      if (!storage_id) {
+        return NextResponse.json({ error: '保管場所を選択してください' }, { status: 400 });
+      }
+
+      const insertMany = db.transaction((itemsList: Array<{ card_id: string; count: number }>) => {
+        let addedTotal = 0;
+        for (const item of itemsList) {
+          if (!item.card_id) continue;
+          const c = item.count || 1;
+          const cond = 'プレイ用';
+          const existing = db.prepare(`
+            SELECT id, count FROM inventory 
+            WHERE storage_id = ? AND card_id = ? AND condition = ?
+          `).get(storage_id, item.card_id, cond) as { id: number; count: number } | undefined;
+
+          if (existing) {
+            db.prepare(`
+              UPDATE inventory 
+              SET count = ?, updated_at = CURRENT_TIMESTAMP
+              WHERE id = ?
+            `).run(existing.count + c, existing.id);
+          } else {
+            db.prepare(`
+              INSERT INTO inventory (storage_id, card_id, count, condition, memo)
+              VALUES (?, ?, ?, ?, '')
+            `).run(storage_id, item.card_id, c, cond);
+          }
+          addedTotal += c;
+        }
+        return addedTotal;
+      });
+
+      const totalCount = insertMany(body.items);
+      return NextResponse.json({ success: true, count: totalCount, itemsCount: body.items.length });
+    }
+
     const { storage_id, card_id, count = 1, condition = 'プレイ用', memo = '' } = body;
 
     if (!storage_id || !card_id) {
       return NextResponse.json({ error: '保管場所とカードを選択してください' }, { status: 400 });
     }
-
-    const db = getDb();
 
     // 同一ストレージ・同一カード・同一状態の既存エントリをチェック
     const existing = db.prepare(`

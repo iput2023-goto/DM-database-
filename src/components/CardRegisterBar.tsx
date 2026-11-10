@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Check, Box, Loader2, X, ArrowUp, ArrowDown, Sparkles, Maximize2 } from 'lucide-react';
+import { Search, Plus, Check, Box, Loader2, X, ArrowUp, ArrowDown, Sparkles, Maximize2, Layers } from 'lucide-react';
 import { getCivilizationColor } from '@/lib/civilization';
 import { normalizeForSearch } from '@/lib/normalize';
 import { getRarityRank, getRarityBadgeStyle } from '@/lib/rarity';
 import { StorageItem, CardMaster, CardFace } from '@/types';
 import { CARD_TYPE_CATEGORIES, matchesCardTypeFilter } from './InventoryView';
-import { searchOfflineCards, localAddInventoryItem } from '@/lib/clientStorage';
+import { searchOfflineCards, localAddInventoryItem, searchDecksByQuery, localAddDeckToStorage, PreconstructedDeck } from '@/lib/clientStorage';
 
 /** 検索語が表面ではなく裏面（覚醒面など）の名前・フリガナに一致した場合、その面を返す */
 function findBackFaceHit(card: CardMaster, query: string): CardFace | null {
@@ -217,6 +217,8 @@ export default function CardRegisterBar({
 
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<CardMaster[]>([]);
+  const [matchedDecks, setMatchedDecks] = useState<PreconstructedDeck[]>([]);
+  const [isAddingDeck, setIsAddingDeck] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardMaster | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(false);
@@ -279,9 +281,14 @@ export default function CardRegisterBar({
   useEffect(() => {
     if (!query.trim()) {
       setSuggestions([]);
+      setMatchedDecks([]);
       setShowDropdown(false);
       return;
     }
+
+    // デッキ検索（同期的・即時）
+    const decks = searchDecksByQuery(query.trim());
+    setMatchedDecks(decks);
 
     const timer = setTimeout(async () => {
       setIsLoading(true);
@@ -313,6 +320,46 @@ export default function CardRegisterBar({
 
     return () => clearTimeout(timer);
   }, [query]);
+
+  // 構築済みデッキを一括追加
+  const handleAddDeck = async (deck: PreconstructedDeck) => {
+    if (!targetStorageId || isAddingDeck) return;
+    setIsAddingDeck(true);
+    const targetStorage = storages.find((s) => s.id === targetStorageId);
+    try {
+      let registeredOnServer = false;
+      try {
+        const payload = {
+          storage_id: targetStorageId,
+          items: deck.cards.map((c) => ({ card_id: c.id, count: c.count })),
+        };
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          registeredOnServer = true;
+        }
+      } catch {
+        registeredOnServer = false;
+      }
+
+      if (!registeredOnServer) {
+        localAddDeckToStorage(targetStorageId, deck);
+      }
+
+      const storageName = targetStorage ? targetStorage.name : 'ストレージ';
+      setSuccessToast(`構築済みデッキ「${deck.name}」(${deck.totalCards}枚) を一括登録しました！`);
+      setTimeout(() => setSuccessToast(null), 3500);
+      onCardAdded();
+    } catch (e) {
+      console.error(e);
+      alert('デッキの登録に失敗しました');
+    } finally {
+      setIsAddingDeck(false);
+    }
+  };
 
   // サジェストから直接追加（検索結果は閉じずに維持）
   const handleDirectAdd = async (card: CardMaster, addCount: number = count) => {
@@ -558,8 +605,48 @@ export default function CardRegisterBar({
           </div>
 
           {/* サジェストドロップダウン */}
-          {showDropdown && suggestions.length > 0 && (
+          {showDropdown && (suggestions.length > 0 || matchedDecks.length > 0) && (
             <div className="absolute left-0 right-0 top-full mt-1.5 max-h-96 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 divide-y divide-slate-800">
+              {/* 構築済みデッキ一致バナー */}
+              {matchedDecks.length > 0 && (
+                <div className="bg-gradient-to-r from-amber-950/80 to-slate-900 p-2.5 border-b border-amber-600/40">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300 mb-2">
+                    <Layers className="w-4 h-4 text-amber-400" />
+                    <span>構築済みデッキが見つかりました（タップで全カード一括追加）</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {matchedDecks.slice(0, 3).map((deck) => (
+                      <div
+                        key={deck.id}
+                        className="flex items-center justify-between gap-3 p-2 bg-slate-900/90 hover:bg-slate-800 border border-amber-500/30 rounded-xl transition"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs text-white truncate">{deck.name}</div>
+                          <div className="text-[11px] text-amber-400/90 font-mono">
+                            {deck.code} • 全{deck.uniqueCards}種 / 計{deck.totalCards}枚
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isAddingDeck}
+                          onClick={() => handleAddDeck(deck)}
+                          className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1 shadow disabled:opacity-50"
+                        >
+                          {isAddingDeck ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>一括追加 ({deck.totalCards}枚)</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ドロップダウン内 ソート＆カードタイプ絞り込みバー */}
               <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur px-3 py-2 border-b border-slate-800 space-y-1.5">
                 <div className="flex items-center justify-between gap-2 text-[11px]">
