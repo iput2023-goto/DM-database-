@@ -1,0 +1,50 @@
+name: Build Android APK
+
+on:
+  push:
+    branches:
+      - goto
+      - main
+    paths-ignore:
+      - '**.apk'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build Signed Android APK
+        run: |
+          chmod +x android/build_apk.sh
+          ./android/build_apk.sh
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DM-Vault-Android-APK
+          path: デュエマ管理アプリ.apk
+
+      - name: Commit APK to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "デュエマ管理アプリ.apk" "public/DM-Vault.apk"
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: Android用インストールファイル (デュエマ管理アプリ.apk) を自動ビルド [skip ci]"
+            git push origin HEAD:${GITHUB_REF#refs/heads/}
+          fi
+

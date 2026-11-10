@@ -3,13 +3,14 @@
 import React, { useState } from 'react';
 import { Box, Plus, Trash2, Edit2, Layers, Folder, ChevronRight, X, RotateCcw } from 'lucide-react';
 import { StorageItem } from '@/types';
+import { localCreateStorage, localDeleteStorage } from '@/lib/clientStorage';
 
 interface StorageSidebarProps {
   storages: StorageItem[];
   selectedStorageId: number | 'all';
   onSelectStorage: (id: number | 'all') => void;
   onRefresh: () => void;
-  onClearStorage?: (storageId: number | 'all') => void;
+  onClearStorageCards?: (storageId: number | 'all') => void;
 }
 
 export default function StorageSidebar({
@@ -17,7 +18,7 @@ export default function StorageSidebar({
   selectedStorageId,
   onSelectStorage,
   onRefresh,
-  onClearStorage,
+  onClearStorageCards,
 }: StorageSidebarProps) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newName, setNewName] = useState('');
@@ -42,22 +43,30 @@ export default function StorageSidebar({
 
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/storages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: newName.trim(),
-          color: newColor,
-          memo: newMemo.trim(),
-        }),
-      });
-
-      if (res.ok) {
-        setNewName('');
-        setNewMemo('');
-        setShowAddModal(false);
-        onRefresh();
+      let createdOnServer = false;
+      try {
+        const res = await fetch('/api/storages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newName.trim(),
+            color: newColor,
+            memo: newMemo.trim(),
+          }),
+        });
+        if (res.ok) createdOnServer = true;
+      } catch {
+        createdOnServer = false;
       }
+
+      if (!createdOnServer) {
+        localCreateStorage(newName.trim(), newColor, newMemo.trim());
+      }
+
+      setNewName('');
+      setNewMemo('');
+      setShowAddModal(false);
+      onRefresh();
     } catch (e) {
       console.error(e);
     } finally {
@@ -72,26 +81,25 @@ export default function StorageSidebar({
     }
 
     try {
-      const res = await fetch(`/api/storages/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        if (selectedStorageId === id) {
-          onSelectStorage('all');
-        }
-        onRefresh();
+      let deletedOnServer = false;
+      try {
+        const res = await fetch(`/api/storages/${id}`, { method: 'DELETE' });
+        if (res.ok) deletedOnServer = true;
+      } catch {
+        deletedOnServer = false;
       }
+
+      if (!deletedOnServer) {
+        localDeleteStorage(id);
+      }
+
+      if (selectedStorageId === id) {
+        onSelectStorage('all');
+      }
+      onRefresh();
     } catch (e) {
       console.error(e);
     }
-  };
-
-  // ストレージ内のカードのみ全削除
-  const handleClearStorageCards = async (id: number, name: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!onClearStorage) return;
-    if (!confirm(`ストレージ「${name}」内のカードをすべて削除しますか？\n（※ストレージBOX自体は削除されません）`)) {
-      return;
-    }
-    await onClearStorage(id);
   };
 
   return (
@@ -166,10 +174,13 @@ export default function StorageSidebar({
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 border border-slate-700/60 text-slate-300">
                   {s.total_cards}枚
                 </span>
-                {s.total_cards > 0 && onClearStorage && (
+                {s.total_cards > 0 && onClearStorageCards && (
                   <button
                     type="button"
-                    onClick={(e) => handleClearStorageCards(s.id, s.name, e)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onClearStorageCards(s.id);
+                    }}
                     className="opacity-0 group-hover:opacity-100 p-1 text-slate-500 hover:text-amber-400 transition"
                     title="このストレージのカードを全削除（空にする）"
                   >

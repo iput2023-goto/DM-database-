@@ -1,9 +1,22 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'デュエマ ストレージマネージャー | カード保管データベース',
-  description: 'デュエル・マスターズの全カードに対応した所持カード・ストレージ保管管理アプリ',
+  title: 'DM Vault | デュエマ ストレージマネージャー',
+  description: 'デュエル・マスターズの全カードに対応した所持カード・ストレージ保管管理アプリ（PC・スマホ両対応）',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'DM Vault',
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0f172a',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -19,4 +32,3 @@ export default function RootLayout({
     </html>
   );
 }
-

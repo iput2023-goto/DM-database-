@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>DM Vault | デュエマ ストレージ管理</title>
+<style>
+  :root {
+    --bg: #020617;
+    --panel: #0f172a;
+    --panel-2: #1e293b;
+    --border: #334155;
+    --text: #f8fafc;
+    --muted: #94a3b8;
+    --primary: #2563eb;
+    --primary-hover: #3b82f6;
+    --emerald: #10b981;
+    --amber: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 80px;
+  }
+  button, input, select { font-family: inherit; }
+  .header {
+    position: sticky; top: 0; z-index: 30;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #1e293b;
+    padding: 10px 14px;
+  }
+  .header-inner {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #2563eb, #7c3aed);
+    border: 1.5px solid #f59e0b;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 13px; color: #fde047;
+  }
+  .brand-title { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+  .badge-mode {
+    font-size: 10px; padding: 2px 7px; border-radius: 999px;
+    background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #6ee7b7;
+  }
+  .stats-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .stat-pill {
+    background: var(--panel-2); border: 1px solid var(--border);
+    padding: 5px 9px; border-radius: 10px; font-size: 11px; display: flex; align-items: center; gap: 5px;
+  }
+  .btn {
+    border: 1px solid var(--border); background: var(--panel-2); color: var(--text);
+    padding: 7px 11px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--primary); border-color: #3b82f6; color: #fff; }
+  .btn-emerald { background: #059669; border-color: #10b981; color: #fff; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 10px 12px; }
+  .storage-strip {
+    display: flex; gap: 7px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 10px;
+    scrollbar-width: none;
+  }
+  .storage-strip::-webkit-scrollbar { display: none; }
+  .storage-pill {
+    white-space: nowrap; padding: 7px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    border: 1px solid var(--border); background: var(--panel); color: #cbd5e1;
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer; flex-shrink: 0;
+  }
+  .storage-pill.active { background: var(--primary); border-color: #60a5fa; color: #fff; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .panel {
+    background: var(--panel); border: 1px solid #1e293b; border-radius: 16px;
+    padding: 12px; margin-bottom: 12px;
+  }
+  .panel-add {
+    background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.95) 100%);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: 16px; padding: 12px; margin-bottom: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+  .input {
+    width: 100%; background: var(--panel-2); border: 1px solid var(--border);
+    color: #fff; border-radius: 11px; padding: 9px 11px; font-size: 13px; outline: none;
+  }
+  .input:focus { border-color: #3b82f6; }
+  .filter-bar { display: flex; gap: 6px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
+  .filter-bar::-webkit-scrollbar { display: none; }
+  .chip {
+    white-space: nowrap; padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    border: 1px solid var(--border); background: #162032; color: #94a3b8; cursor: pointer;
+  }
+  .chip.active { background: rgba(37, 99, 235, 0.32); border-color: #3b82f6; color: #bfdbfe; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (min-width: 640px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; } }
+  @media (min-width: 960px) { .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  @media (min-width: 1200px) { .grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .card-tile {
+    background: #090d16; border: 1px solid #1e293b; border-radius: 14px;
+    overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .card-img-wrap {
+    position: relative; aspect-ratio: 7 / 10; background: #0f172a; overflow: hidden; cursor: pointer;
+  }
+  .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .badge-count {
+    position: absolute; top: 6px; right: 6px;
+    background: rgba(2, 6, 23, 0.92); border: 1px solid #3b82f6;
+    color: #fff; font-weight: 800; font-size: 13px; padding: 2px 8px; border-radius: 999px;
+  }
+  .badge-civil {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;
+    background: rgba(15, 23, 42, 0.92); color: #fff;
+  }
+  .badge-cost {
+    position: absolute; bottom: 6px; left: 6px;
+    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;
+    background: rgba(2, 6, 23, 0.92); border: 1px solid #334155; color: #e2e8f0;
+  }
+  .badge-rarity {
+    position: absolute; bottom: 6px; right: 6px;
+    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;
+    background: rgba(88, 28, 135, 0.92); border: 1px solid #a855f7; color: #f3e8ff;
+  }
+  .card-body { padding: 8px 9px; display: flex; flex-direction: column; gap: 5px; flex: 1; justify-content: space-between; }
+  .card-title { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-sub { font-size: 10px; color: var(--muted); display: flex; justify-content: space-between; gap: 4px; }
+  .card-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 6px; border-top: 1px solid #1e293b;
+  }
+  .counter-group { display: flex; align-items: center; gap: 6px; }
+  .btn-Step {
+    width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--panel-2); color: #fff; font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .btn-Step:active { transform: scale(0.94); }
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: rgba(15, 23, 42, 0.97); backdrop-filter: blur(10px);
+    border-top: 1px solid #1e293b; display: flex; justify-content: space-around; padding: 6px 6px;
+  }
+  .nav-item {
+    flex: 1; border: none; background: transparent; color: var(--muted);
+    padding: 6px 2px; font-size: 11px; font-weight: 700; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 2px; border-radius: 10px;
+  }
+  .nav-item.active { color: #60a5fa; background: rgba(37, 99, 235, 0.14); }
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.85);
+    display: none; align-items: center; justify-content: center; padding: 10px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
+    width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; padding: 16px;
+  }
+  .modal-box-wide {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 20px;
+    width: 100%; max-width: 1040px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden;
+  }
+  .suggest-list {
+    margin-top: 8px; max-height: 360px; overflow-y: auto;
+    border: 1px solid var(--border); border-radius: 12px; background: #090d16;
+  }
+  .suggest-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 8px 10px; border-bottom: 1px solid #1e293b;
+  }
+  .toast {
+    position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
+    background: #065f46; border: 1px solid #10b981; color: #ecfdf5;
+    padding: 8px 16px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    z-index: 60; display: none; box-shadow: 0 8px 25px rgba(0,0,0,0.5); white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">DM</div>
+        <div>
+          <div class="brand-title">
+            DM Vault
+            <span class="badge-mode" id="dbStatusBadge">準備中...</span>
+          </div>
+          <div style="font-size:10px;color:#94a3b8;">デュエマ ストレージ＆カード管理アプリ</div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-pill">
+          <span>総数:<strong id="totalCountEl" style="color:#fff;margin-left:2px;">0</strong>枚</span>
+          <span style="color:#475569;">|</span>
+          <span><strong id="uniqueCountEl" style="color:#34d399;">0</strong>種</span>
+        </div>
+        <button class="btn" onclick="openSyncModal()">🔄 PC同期・保存</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ストレージ横スクロールバー -->
+    <div class="storage-strip" id="storageStrip"></div>
+
+    <!-- メイン画面（カード検索・追加 ＋ 保管カード一覧の両方を1画面に表示！） -->
+    <section id="viewMain">
+      <!-- ① 全24,049枚からカードを検索してストレージに追加 -->
+      <div class="panel-add" id="addCardPanel">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:800;color:#60a5fa;display:flex;align-items:center;gap:5px;">
+            <span>➕ カードを検索してストレージに追加</span>
+          </div>
+          <span style="font-size:10px;color:#94a3b8;">全24,049枚対応（読み・裏面・型番OK）</span>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
+          <div style="flex:1;min-width:140px;">
+            <select id="addTargetStorage" class="input" style="padding:7px 10px;font-size:12px;"></select>
+          </div>
+          <div style="width:88px;">
+            <select id="addCountSelect" class="input" style="padding:7px 8px;font-size:12px;">
+              <option value="1">1枚追加</option>
+              <option value="2">2枚追加</option>
+              <option value="3">3枚追加</option>
+              <option value="4">4枚追加</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input
+            type="text"
+            id="masterSearchInput"
+            class="input"
+            placeholder="カード名・読み・型番を入力 (例: メンデルスゾーン、DM26EX5)..."
+            oninput="onMasterSearch()"
+            onkeydown="onMasterKeyDown(event)"
+            style="flex:1;"
+          />
+          <button class="btn btn-primary" onclick="openBigSearchModal()" style="padding:9px 11px;flex-shrink:0;">
+            🔍 一覧
+          </button>
+          <button class="btn" id="btnClearSearch" onclick="clearMasterSearch()" style="padding:9px 9px;display:none;flex-shrink:0;">
+            ✕
+          </button>
+        </div>
+
+        <!-- リアルタイム検索候補リスト -->
+        <div id="masterSuggestList" class="suggest-list" style="display:none;"></div>
+      </div>
+
+      <!-- ② 保管カード一覧＆絞り込みパネル -->
+      <div class="panel" id="inventorySectionPanel">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;">
+            <span>📦 保管中のカード一覧</span>
+            <span id="filteredSummaryBadge" style="font-size:11px;font-weight:600;color:#94a3b8;background:#1e293b;padding:2px 8px;border-radius:999px;">0枚</span>
+          </div>
+          <button class="btn" id="btnClearStorage" onclick="clearStorageCards(selectedStorageId)" style="background:rgba(127,29,29,0.5);border-color:#b91c1c;color:#fca5a5;padding:5px 10px;font-size:11px;">
+            🗑 全削除
+          </button>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
+          <input type="text" id="invSearchInput" class="input" placeholder="所持カード内を絞り込み..." oninput="renderInventory()" style="flex:1;min-width:130px;padding:7px 10px;font-size:12px;" />
+          <select id="sortSelect" class="input" style="width:auto;padding:7px 8px;font-size:12px;" onchange="renderInventory()">
+            <option value="cost_asc">コスト小順</option>
+            <option value="cost_desc">コスト大順</option>
+            <option value="rarity_desc">レア度高い順</option>
+            <option value="rarity_asc">レア度低い順</option>
+            <option value="count_desc">枚数順</option>
+            <option value="name_asc">名前順</option>
+            <option value="updated_desc">追加順</option>
+          </select>
+          <button class="btn" onclick="toggleExtraFilters()" id="btnToggleFilters" style="padding:7px 10px;font-size:11px;">絞り込み ▼</button>
+        </div>
+
+        <div class="filter-bar" id="civilFilterBar"></div>
+        <div id="extraFilterWrap" style="display:none;">
+          <div class="filter-bar" id="typeFilterBar"></div>
+          <div class="filter-bar" id="rarityFilterBar"></div>
+          <div class="filter-bar" id="costFilterBar"></div>
+        </div>
+      </div>
+
+      <div id="inventoryGrid" class="grid"></div>
+    </section>
+
+    <!-- ストレージ管理画面 -->
+    <section id="viewStorages" style="display:none;">
+      <div class="panel">
+        <h3 style="margin:0 0 10px 0;font-size:14px;">📁 ストレージ作成・管理</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+          <input type="text" id="newStorageName" class="input" placeholder="新しいストレージ名 (例: デッキケースA)" style="flex:1;min-width:160px;" />
+          <input type="color" id="newStorageColor" value="#3b82f6" style="width:42px;height:38px;border:none;background:transparent;cursor:pointer;" />
+          <button class="btn btn-primary" onclick="createStorage()">＋ 作成</button>
+        </div>
+        <div id="storageManageList" style="display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ボトムナビゲーション -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="navBtnInv" onclick="switchTab('inv')">
+      <span>📦 保管一覧</span>
+    </button>
+    <button class="nav-item" id="navBtnAdd" onclick="switchTab('add')">
+      <span>➕ カード追加</span>
+    </button>
+    <button class="nav-item" id="navBtnStorages" onclick="switchTab('storages')">
+      <span>📁 ストレージ</span>
+    </button>
+    <button class="nav-item" onclick="openSyncModal()">
+      <span>🔄 PC同期・保存</span>
+    </button>
+  </nav>
+
+  <!-- 大画面カード検索結果モーダル（カード画像タイルで連続追加） -->
+  <div class="modal-backdrop" id="bigSearchModal" onclick="closeBigSearchModal()">
+    <div class="modal-box-wide" onclick="event.stopPropagation()">
+      <div style="padding:12px 14px;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+        <div>
+          <strong style="font-size:14px;color:#fff;" id="bigSearchTitle">検索結果</strong>
+          <div style="font-size:11px;color:#94a3b8;">「＋1枚」「＋4」をタップすると画面を閉じずに連続追加できます</div>
+        </div>
+        <button class="btn" onclick="closeBigSearchModal()">✕ 閉じる</button>
+      </div>
+      <div style="padding:10px 14px;border-bottom:1px solid #1e293b;background:#090d16;display:flex;gap:8px;align-items:center;">
+        <input
+          type="text"
+          id="bigModalSearchInput"
+          class="input"
+          placeholder="カード名・読み・型番を入力..."
+          oninput="onBigModalSearchInput()"
+          style="flex:1;padding:8px 10px;"
+        />
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:12px;" id="bigSearchGridWrap">
+        <div id="bigSearchGrid" class="grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- カード詳細モーダル -->
+  <div class="modal-backdrop" id="cardDetailModal" onclick="closeDetailModal()">
+    <div class="modal-box" onclick="event.stopPropagation()" id="cardDetailBox"></div>
+  </div>
+
+  <!-- PC同期・バックアップモーダル -->
+  <div class="modal-backdrop" id="syncModal" onclick="closeSyncModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <h3 style="margin:0;font-size:15px;">🔄 PC連携・データバックアップ</h3>
+        <button class="btn" onclick="closeSyncModal()">✕ 閉じる</button>
+      </div>
+
+      <!-- 自宅Wi-FiでPC本体とワンタップ直接同期 -->
+      <div style="background:#162032;border:1px solid #334155;border-radius:14px;padding:12px;margin-bottom:12px;">
+        <div style="font-size:13px;font-weight:700;color:#60a5fa;margin-bottom:6px;">🏠 自宅Wi-FiでPC本体とワンタップ同期</div>
+        <div style="font-size:11px;color:#94a3b8;margin-bottom:8px;">
+          PCで「DM Vault」を起動中、PC画面の「自宅Wi-Fi接続」に表示されるアドレス（例: <code>192.168.1.10:3000</code>）を入力すると直接データを送受信できます。
+        </div>
+        <input type="text" id="pcHostInput" class="input" placeholder="例: http://192.168.1.10:3000" style="margin-bottom:8px;" />
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button class="btn btn-primary" style="justify-content:center;padding:10px;" onclick="syncFromPcWifi()">
+            📥 PCから受信
+          </button>
+          <button class="btn btn-emerald" style="justify-content:center;padding:10px;" onclick="syncToPcWifi()">
+            📤 PCへ送信(統合)
+          </button>
+        </div>
+      </div>
+
+      <!-- JSONファイル入出力 -->
+      <div style="background:#162032;border:1px solid #334155;border-radius:14px;padding:12px;">
+        <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:6px;">💾 ファイルで書き出し・読み込み (.json)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button class="btn" style="justify-content:center;padding:10px;" onclick="exportBackupJson()">
+            📤 現在のデータをJSONファイルに保存
+          </button>
+          <label class="btn" style="justify-content:center;padding:10px;cursor:pointer;">
+            📥 JSONバックアップファイルを読み込む
+            <input type="file" accept=".json" style="display:none;" onchange="importBackupJson(event)" />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastEl"></div>
+
+<script>
+const IMAGE_PREFIX = __IMAGE_PREFIX_JSON__;
+const INITIAL_DATA = __INITIAL_DATA_JSON__;
+const CARDS_GZIP_B64 = "__CARDS_GZIP_B64__";
+const LS_KEY = "dm_vault_portable_state_v1";
+const LS_PC_HOST_KEY = "dm_vault_pc_host_v1";
+
+let state = loadState();
+let selectedStorageId = "all";
+let selectedCivil = "all";
+let selectedType = "all";
+let selectedRarity = "all";
+let selectedCost = "all";
+let showExtraFilters = false;
+let currentDetailInvId = null;
+let currentDetailFaceIdx = 0;
+let allCards = [];
+let recentAddedCounts = {};
+
+const HIGH_RARITIES = new Set(["DMR","OR","KGM","MAS","MDG","MDS","MSS","MSZ","MHZ","DG","LEG","WVC","VIC","DSR","KGR","SPR"]);
+
+function getRarityRank(rarity, pack) {
+  const r = String(rarity || "").trim().toUpperCase();
+  const map = { DMR:110, OR:105, KGM:100, MAS:95, MDG:95, MDS:95, MSS:95, MSZ:95, MHZ:95, DG:95, LEG:90, WVC:88, VIC:85, DSR:82, KGR:82, SPR:78, SR:70, VR:60, R:50, U:40, C:30 };
+  let base = map[r] || 10;
+  const p = String(pack || "");
+  if (p.includes("㊙") || p.includes("秘")) base += 3;
+  return base;
+}
+
+function getCardTypeCat(name, type) {
+  const t = String(type || "");
+  const n = String(name || "");
+  if (n.includes(" / ") || n.includes("／")) return "ツインパクト";
+  if (t.includes("サイキック")) return "サイキック";
+  if (t.includes("ドラグハート")) return "ドラグハート";
+  if (t.includes("GR") || t.includes("オーラ")) return "GR / オーラ";
+  if (t.includes("進化")) return "進化クリーチャー";
+  if (t.includes("タマシード")) return "タマシード";
+  if (t.includes("クリーチャー")) return "クリーチャー";
+  if (t.includes("呪文")) return "呪文";
+  if (t.includes("フィールド") || t.includes("城") || t.includes("クロスギア")) return "フィールド / 城 / ギア";
+  return "その他";
+}
+
+function normalize(str) {
+  if (!str) return "";
+  return String(str)
+    .normalize("NFKC")
+    .toLowerCase()
+    .replace(/[\u3041-\u3096]/g, function(ch) { return String.fromCharCode(ch.charCodeAt(0) + 0x60); })
+    .replace(/[\s・|「」『』【】"“”'’‘\-－―—–]+/g, "");
+}
+
+function expandImg(img) {
+  if (!img) return "";
+  if (img.startsWith("http") || img.startsWith("/")) return img;
+  return IMAGE_PREFIX + img;
+}
+
+function loadState() {
+  try {
+    if (window.AndroidBridge && typeof window.AndroidBridge.loadStateJson === "function") {
+      const nativeRaw = window.AndroidBridge.loadStateJson();
+      if (nativeRaw) {
+        const parsed = JSON.parse(nativeRaw);
+        if (parsed && Array.isArray(parsed.storages) && Array.isArray(parsed.inventory)) return parsed;
+      }
+    }
+  } catch (e) {}
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.storages) && Array.isArray(parsed.inventory)) return parsed;
+    }
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(INITIAL_DATA));
+}
+
+function saveState() {
+  recomputeStorageTotals();
+  const jsonStr = JSON.stringify(state);
+  try { localStorage.setItem(LS_KEY, jsonStr); } catch (e) {}
+  try {
+    if (window.AndroidBridge && typeof window.AndroidBridge.saveStateJson === "function") {
+      window.AndroidBridge.saveStateJson(jsonStr);
+    }
+  } catch (e) {}
+  updateHeaderStats();
+}
+
+function recomputeStorageTotals() {
+  state.storages.forEach(function(s) {
+    const items = state.inventory.filter(function(i) { return i.storage_id === s.id; });
+    s.total_cards = items.reduce(function(a, b) { return a + b.count; }, 0);
+    s.unique_cards = items.length;
+  });
+}
+
+function showToast(msg) {
+  const el = document.getElementById("toastEl");
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(function() { el.style.display = "none"; }, 2500);
+}
+
+function parseCardTuples(tuples) {
+  allCards = tuples.map(function(t) {
+    const id = t[0], name = t[1], name_ruby = t[2], pack = t[3], type = t[4], civil = t[5], rarity = t[6], cost = t[7], power = t[8], race = t[9], imgShort = t[10], alt_names = t[11], facesShort = t[12];
+    const alts = alt_names ? alt_names.split(" / ") : [];
+    const parts = [name, name_ruby].concat(alts, [pack, id, race]).map(normalize).filter(Boolean);
+    const sk = "|" + parts.join("|") + "|";
+    return {
+      id: id, name: name, name_ruby: name_ruby, pack: pack, type: type, civil: civil, rarity: rarity, cost: cost, power: power, race: race,
+      image: expandImg(imgShort), alt_names: alt_names, faces_json: facesShort, search_key: sk
+    };
+  });
+  const badge = document.getElementById("dbStatusBadge");
+  if (badge) badge.textContent = "全" + allCards.length.toLocaleString() + "枚 収録済";
+  const currentQ = document.getElementById("masterSearchInput") ? document.getElementById("masterSearchInput").value : "";
+  if (currentQ && currentQ.trim()) {
+    onMasterSearch();
+  }
+}
+
+async function initCardsDb() {
+  try {
+    // 1. Androidネイティブ展開（最速・確実）
+    if (window.AndroidBridge && typeof window.AndroidBridge.decompressGzipBase64 === "function") {
+      const jsonText = window.AndroidBridge.decompressGzipBase64(CARDS_GZIP_B64);
+      if (jsonText && jsonText.length > 10) {
+        parseCardTuples(JSON.parse(jsonText));
+        return;
+      }
+    }
+    // 2. ブラウザ標準 DecompressionStream
+    const binStr = atob(CARDS_GZIP_B64);
+    const bytes = new Uint8Array(binStr.length);
+    for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+    const ds = new DecompressionStream("gzip");
+    const stream = new Blob([bytes]).stream().pipeThrough(ds);
+    const jsonText = await new Response(stream).text();
+    parseCardTuples(JSON.parse(jsonText));
+  } catch (e) {
+    console.error("initCardsDb error:", e);
+    const badge = document.getElementById("dbStatusBadge");
+    if (badge) badge.textContent = "ローカル保管モード";
+  }
+}
+
+function updateHeaderStats() {
+  const total = state.inventory.reduce(function(a, b) { return a + b.count; }, 0);
+  const uniq = new Set(state.inventory.map(function(i) { return i.card_id; })).size;
+  const tEl = document.getElementById("totalCountEl");
+  const uEl = document.getElementById("uniqueCountEl");
+  if (tEl) tEl.textContent = total;
+  if (uEl) uEl.textContent = uniq;
+}
+
+function toggleExtraFilters() {
+  showExtraFilters = !showExtraFilters;
+  document.getElementById("extraFilterWrap").style.display = showExtraFilters ? "block" : "none";
+  document.getElementById("btnToggleFilters").textContent = showExtraFilters ? "絞り込み ▲" : "絞り込み ▼";
+}
+
+function renderStorageStrip() {
+  recomputeStorageTotals();
+  const totalAll = state.inventory.reduce(function(a, b) { return a + b.count; }, 0);
+  const strip = document.getElementById("storageStrip");
+  let html = '<button class="storage-pill ' + (selectedStorageId === "all" ? "active" : "") + '" onclick="selectStorage(\'all\')">すべて (' + totalAll + '枚)</button>';
+  state.storages.forEach(function(s) {
+    html += '<button class="storage-pill ' + (selectedStorageId === s.id ? "active" : "") + '" onclick="selectStorage(' + s.id + ')"><span class="dot" style="background:' + (s.color || "#3b82f6") + '"></span>' + escapeHtml(s.name) + ' (' + s.total_cards + '枚)</button>';
+  });
+  strip.innerHTML = html;
+
+  const sel = document.getElementById("addTargetStorage");
+  if (sel) {
+    const curVal = sel.value;
+    sel.innerHTML = state.storages.map(function(s) {
+      return '<option value="' + s.id + '">追加先: ' + escapeHtml(s.name) + ' (' + s.total_cards + '枚)</option>';
+    }).join("");
+    if (selectedStorageId !== "all") sel.value = String(selectedStorageId);
+    else if (curVal) sel.value = curVal;
+  }
+
+  const manageEl = document.getElementById("storageManageList");
+  if (manageEl) {
+    manageEl.innerHTML = state.storages.map(function(s) {
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#162032;border:1px solid #334155;border-radius:12px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span class="dot" style="background:' + (s.color || "#3b82f6") + '"></span>' +
+          '<strong>' + escapeHtml(s.name) + '</strong>' +
+          '<span style="font-size:12px;color:#94a3b8;">(' + s.total_cards + '枚 / ' + s.unique_cards + '種)</span>' +
+        '</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;">' +
+          (s.total_cards > 0 ? '<button class="btn" style="color:#fca5a5;border-color:#991b1b;" onclick="clearStorageCards(' + s.id + ')">🗑 空にする</button>' : '') +
+          (state.storages.length > 1 ? '<button class="btn" style="color:#f87171;" onclick="deleteStorage(' + s.id + ')">削除</button>' : '') +
+        '</div>' +
+      '</div>';
+    }).join("");
+  }
+}
+
+function selectStorage(id) {
+  selectedStorageId = id;
+  renderStorageStrip();
+  renderInventory();
+}
+
+function renderFilterBars() {
+  const civils = ["all", "火", "水", "自然", "光", "闇", "多色", "ゼロ"];
+  document.getElementById("civilFilterBar").innerHTML = civils.map(function(c) {
+    return '<button class="chip ' + (selectedCivil === c ? "active" : "") + '" onclick="selectedCivil=\'' + c + '\';renderFilterBars();renderInventory();">' +
+      (c === "all" ? "全文明" : c) +
+    '</button>';
+  }).join("");
+
+  const types = ["all", "クリーチャー", "進化クリーチャー", "呪文", "ツインパクト", "タマシード", "サイキック", "ドラグハート", "GR / オーラ", "フィールド / 城 / ギア", "その他"];
+  document.getElementById("typeFilterBar").innerHTML = types.map(function(t) {
+    return '<button class="chip ' + (selectedType === t ? "active" : "") + '" onclick="selectedType=\'' + t + '\';renderFilterBars();renderInventory();">' +
+      (t === "all" ? "全タイプ" : t) +
+    '</button>';
+  }).join("");
+
+  const rarities = [
+    { l: "全レア度", v: "all" },
+    { l: "👑最高レア", v: "HIGH" },
+    { l: "★SR", v: "SR" },
+    { l: "◆VR", v: "VR" },
+    { l: "●R", v: "R" },
+    { l: "▲U", v: "U" },
+    { l: "■C", v: "C" }
+  ];
+  document.getElementById("rarityFilterBar").innerHTML = rarities.map(function(r) {
+    return '<button class="chip ' + (selectedRarity === r.v ? "active" : "") + '" onclick="selectedRarity=\'' + r.v + '\';renderFilterBars();renderInventory();">' +
+      r.l +
+    '</button>';
+  }).join("");
+
+  const costs = ["all", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
+  document.getElementById("costFilterBar").innerHTML = costs.map(function(c) {
+    return '<button class="chip ' + (selectedCost === c ? "active" : "") + '" onclick="selectedCost=\'' + c + '\';renderFilterBars();renderInventory();">' +
+      (c === "all" ? "全コスト" : "コスト " + c) +
+    '</button>';
+  }).join("");
+}
+
+function renderInventory() {
+  const q = normalize(document.getElementById("invSearchInput").value);
+  const sortBy = document.getElementById("sortSelect").value;
+
+  const filtered = state.inventory.filter(function(item) {
+    if (selectedStorageId !== "all" && item.storage_id !== selectedStorageId) return false;
+    if (selectedCivil !== "all") {
+      if (selectedCivil === "多色") {
+        if (!(item.card_civil || "").includes("/") && (item.card_civil || "").length <= 2) return false;
+      } else if (!(item.card_civil || "").includes(selectedCivil)) return false;
+    }
+    if (selectedType !== "all") {
+      if (getCardTypeCat(item.card_name, item.card_type) !== selectedType) return false;
+    }
+    if (selectedRarity !== "all") {
+      const r = String(item.card_rarity || "").trim().toUpperCase();
+      if (selectedRarity === "HIGH") { if (!HIGH_RARITIES.has(r)) return false; }
+      else if (r !== selectedRarity) return false;
+    }
+    if (selectedCost !== "all") {
+      if (item.card_cost === null || item.card_cost === undefined) return false;
+      if (selectedCost === "10+") { if (item.card_cost < 10) return false; }
+      else if (item.card_cost !== parseInt(selectedCost, 10)) return false;
+    }
+    if (q) {
+      const hay = normalize([item.card_name, item.card_ruby, item.card_alt_names, item.card_pack, item.card_race, item.card_id].join(" "));
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+
+  filtered.sort(function(a, b) {
+    if (sortBy === "cost_asc") return (a.card_cost ?? 999) - (b.card_cost ?? 999);
+    if (sortBy === "cost_desc") return (b.card_cost ?? -1) - (a.card_cost ?? -1);
+    if (sortBy === "rarity_desc") return getRarityRank(b.card_rarity, b.card_pack) - getRarityRank(a.card_rarity, a.card_pack);
+    if (sortBy === "rarity_asc") return getRarityRank(a.card_rarity, a.card_pack) - getRarityRank(b.card_rarity, b.card_pack);
+    if (sortBy === "count_desc") return b.count - a.count;
+    if (sortBy === "name_asc") return (a.card_name || "").localeCompare(b.card_name || "", "ja");
+    return (b.updated_at || "").localeCompare(a.updated_at || "");
+  });
+
+  const totalFilteredCount = filtered.reduce(function(a, b) { return a + b.count; }, 0);
+  const summaryEl = document.getElementById("filteredSummaryBadge");
+  if (summaryEl) summaryEl.textContent = "合計 " + totalFilteredCount + "枚 (" + filtered.length + "種)";
+
+  const grid = document.getElementById("inventoryGrid");
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px 16px;color:#64748b;border:1px dashed #1e293b;border-radius:16px;">' +
+      '<div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:4px;">保管中のカードがありません</div>' +
+      '<div style="font-size:11px;">上の「➕ カードを検索してストレージに追加」からカード名を入力して追加してください</div>' +
+    '</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map(function(item) {
+    return '<div class="card-tile">' +
+      '<div class="card-img-wrap" onclick="openDetailModal(' + item.id + ', 0)">' +
+        (item.card_image ? '<img src="' + expandImg(item.card_image) + '" loading="lazy" alt="" />' : '<div style="padding:12px;font-size:12px;color:#94a3b8;">' + escapeHtml(item.card_name) + '</div>') +
+        '<div class="badge-count">×' + item.count + '</div>' +
+        '<div class="badge-civil">' + escapeHtml(item.card_civil || "無色") + '</div>' +
+        (item.card_cost !== null && item.card_cost !== undefined ? '<div class="badge-cost">Cost ' + item.card_cost + '</div>' : '') +
+        (item.card_rarity && item.card_rarity !== "-" ? '<div class="badge-rarity">' + escapeHtml(item.card_rarity) + '</div>' : '') +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div>' +
+          '<div class="card-title" title="' + escapeHtml(item.card_name) + '">' + escapeHtml(item.card_name) + '</div>' +
+          '<div class="card-sub">' +
+            '<span style="color:#818cf8;font-family:monospace;">' + escapeHtml(item.card_pack || "") + '</span>' +
+            '<span>' + escapeHtml(item.storage_name || "") + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="card-actions">' +
+          '<div class="counter-group">' +
+            '<button class="btn-Step" onclick="changeCount(' + item.id + ', -1)">−</button>' +
+            '<strong style="min-width:22px;text-align:center;font-size:13px;">' + item.count + '</strong>' +
+            '<button class="btn-Step" onclick="changeCount(' + item.id + ', 1)">＋</button>' +
+          '</div>' +
+          '<button class="btn" style="padding:4px 8px;color:#94a3b8;" onclick="removeCard(' + item.id + ')">🗑</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function changeCount(id, delta) {
+  const idx = state.inventory.findIndex(function(i) { return i.id === id; });
+  if (idx < 0) return;
+  const next = state.inventory[idx].count + delta;
+  if (next <= 0) {
+    if (!confirm("枚数が0になります。削除しますか？")) return;
+    state.inventory.splice(idx, 1);
+  } else {
+    state.inventory[idx].count = next;
+    state.inventory[idx].updated_at = new Date().toISOString();
+  }
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+}
+
+function removeCard(id) {
+  if (!confirm("このカードを保管リストから削除しますか？")) return;
+  state.inventory = state.inventory.filter(function(i) { return i.id !== id; });
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+}
+
+function clearStorageCards(targetId) {
+  const isAll = targetId === "all" || targetId === undefined;
+  const targetStorage = isAll ? null : state.storages.find(function(s) { return s.id === targetId; });
+  const countToClear = isAll
+    ? state.inventory.reduce(function(a, b) { return a + b.count; }, 0)
+    : (targetStorage ? targetStorage.total_cards : 0);
+
+  if (countToClear <= 0) {
+    return showToast("削除するカードがありません");
+  }
+
+  const msg = targetStorage
+    ? "ストレージ「" + targetStorage.name + "」内のすべてのカード（" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）"
+    : "すべてのストレージ内の保管カード（合計" + countToClear + "枚）を一括削除しますか？\n（※ストレージ自体は残ります）";
+
+  if (!confirm(msg)) return;
+
+  if (isAll) {
+    state.inventory = [];
+  } else {
+    state.inventory = state.inventory.filter(function(i) { return i.storage_id !== targetId; });
+  }
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+  showToast(targetStorage ? "「" + targetStorage.name + "」内のカードを全削除しました" : "すべての保管カードを一括削除しました");
+}
+
+function searchAllCardsByQuery(rawQuery, maxResults) {
+  const q = normalize(rawQuery);
+  if (!q) return [];
+  const exactMarker = "|" + q + "|";
+  const prefixMarker = "|" + q;
+  const tier1 = [];
+  const tier2 = [];
+  const tier3 = [];
+
+  for (let i = 0; i < allCards.length; i++) {
+    const c = allCards[i];
+    if (!c.search_key.includes(q)) continue;
+    if (c.search_key.includes(exactMarker)) tier1.push(c);
+    else if (c.search_key.includes(prefixMarker)) tier2.push(c);
+    else tier3.push(c);
+    if (tier1.length >= maxResults) break;
+  }
+  return tier1.concat(tier2, tier3).slice(0, maxResults);
+}
+
+function clearMasterSearch() {
+  const input = document.getElementById("masterSearchInput");
+  input.value = "";
+  document.getElementById("masterSuggestList").style.display = "none";
+  document.getElementById("btnClearSearch").style.display = "none";
+}
+
+function onMasterKeyDown(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    openBigSearchModal();
+  }
+}
+
+function onMasterSearch() {
+  const rawVal = document.getElementById("masterSearchInput").value;
+  const q = normalize(rawVal);
+  const listEl = document.getElementById("masterSuggestList");
+  const clearBtn = document.getElementById("btnClearSearch");
+
+  if (!q) {
+    listEl.style.display = "none";
+    clearBtn.style.display = "none";
+    return;
+  }
+  clearBtn.style.display = "inline-flex";
+  listEl.style.display = "block";
+
+  if (allCards.length === 0) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#94a3b8;font-size:12px;">カード辞書を展開中です。1秒後にもう一度入力してください...</div>';
+    return;
+  }
+
+  const matches = searchAllCardsByQuery(rawVal, 80);
+  if (matches.length === 0) {
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#64748b;font-size:12px;">「' + escapeHtml(rawVal) + '」に一致するカードが見つかりません</div>';
+    return;
+  }
+
+  const selCount = parseInt(document.getElementById("addCountSelect").value, 10) || 1;
+  listEl.innerHTML = matches.map(function(c) {
+    const recent = recentAddedCounts[c.id] || 0;
+    return '<div class="suggest-item">' +
+      '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;" onclick="addMasterCard(\'' + c.id + '\', null)">' +
+        '<img src="' + c.image + '" style="width:38px;height:52px;object-fit:cover;border-radius:6px;background:#1e293b;flex-shrink:0;" loading="lazy" alt="" />' +
+        '<div style="min-width:0;flex:1;">' +
+          (c.name_ruby ? '<div style="font-size:10px;color:#7dd3fc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name_ruby) + '</div>' : '') +
+          '<div style="font-size:13px;font-weight:700;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name) + '</div>' +
+          (c.alt_names ? '<div style="font-size:10px;color:#fcd34d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">⇄ 裏面: ' + escapeHtml(c.alt_names) + '</div>' : '') +
+          '<div style="font-size:11px;color:#94a3b8;">' +
+            '<span style="color:#818cf8;font-family:monospace;">' + escapeHtml(c.pack) + '</span>' +
+            (c.cost !== null ? ' / コスト' + c.cost : '') +
+            (c.rarity ? ' / ' + escapeHtml(c.rarity) : '') +
+            (recent > 0 ? ' <span style="color:#34d399;font-weight:800;">(✓+' + recent + '枚)</span>' : '') +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:5px;flex-shrink:0;">' +
+        '<button class="btn btn-primary" onclick="addMasterCard(\'' + c.id + '\', ' + selCount + ')">＋' + selCount + '枚</button>' +
+        '<button class="btn" onclick="addMasterCard(\'' + c.id + '\', 4)">+4</button>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function openBigSearchModal() {
+  const mainInput = document.getElementById("masterSearchInput");
+  const modalInput = document.getElementById("bigModalSearchInput");
+  modalInput.value = mainInput.value || "";
+  document.getElementById("bigSearchModal").classList.add("open");
+  renderBigSearchModalResults();
+}
+
+function closeBigSearchModal() {
+  document.getElementById("bigSearchModal").classList.remove("open");
+}
+
+function onBigModalSearchInput() {
+  const modalInput = document.getElementById("bigModalSearchInput");
+  document.getElementById("masterSearchInput").value = modalInput.value;
+  onMasterSearch();
+  renderBigSearchModalResults();
+}
+
+function renderBigSearchModalResults() {
+  const rawVal = document.getElementById("bigModalSearchInput").value;
+  const grid = document.getElementById("bigSearchGrid");
+  const titleEl = document.getElementById("bigSearchTitle");
+
+  if (!normalize(rawVal)) {
+    titleEl.textContent = "カード検索一覧";
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 14px;color:#64748b;font-size:13px;">上の入力欄にカード名・読み・型番を入力してください</div>';
+    return;
+  }
+
+  const matches = searchAllCardsByQuery(rawVal, 100);
+  titleEl.textContent = "「" + rawVal + "」の検索結果 (" + matches.length + "件)";
+
+  if (matches.length === 0) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 14px;color:#64748b;font-size:13px;">一致するカードが見つかりません</div>';
+    return;
+  }
+
+  grid.innerHTML = matches.map(function(c) {
+    const recent = recentAddedCounts[c.id] || 0;
+    return '<div class="card-tile">' +
+      '<div class="card-img-wrap" onclick="addMasterCard(\'' + c.id + '\', 1)">' +
+        (c.image ? '<img src="' + c.image + '" loading="lazy" alt="" />' : '<div style="padding:12px;font-size:12px;color:#94a3b8;">' + escapeHtml(c.name) + '</div>') +
+        (recent > 0 ? '<div class="badge-count" style="background:#059669;border-color:#34d399;">✓ +' + recent + '枚</div>' : '') +
+        '<div class="badge-civil">' + escapeHtml(c.civil || "無色") + '</div>' +
+        (c.cost !== null && c.cost !== undefined ? '<div class="badge-cost">Cost ' + c.cost + '</div>' : '') +
+        (c.rarity && c.rarity !== "-" ? '<div class="badge-rarity">' + escapeHtml(c.rarity) + '</div>' : '') +
+      '</div>' +
+      '<div class="card-body">' +
+        '<div>' +
+          (c.name_ruby ? '<div style="font-size:9px;color:#7dd3fc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.name_ruby) + '</div>' : '') +
+          '<div class="card-title" title="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + '</div>' +
+          '<div class="card-sub"><span style="color:#818cf8;font-family:monospace;">' + escapeHtml(c.pack || "") + '</span></div>' +
+        '</div>' +
+        '<div style="display:flex;gap:5px;padding-top:6px;border-top:1px solid #1e293b;">' +
+          '<button class="btn btn-primary" style="flex:1;justify-content:center;padding:7px 4px;" onclick="addMasterCard(\'' + c.id + '\', 1)">＋1枚</button>' +
+          '<button class="btn" style="padding:7px 8px;" onclick="addMasterCard(\'' + c.id + '\', 4)">+4</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join("");
+}
+
+function addMasterCard(cardId, overrideCount) {
+  const card = allCards.find(function(c) { return c.id === cardId; });
+  if (!card) return;
+  const storageId = parseInt(document.getElementById("addTargetStorage").value, 10) || (state.storages[0] && state.storages[0].id) || 1;
+  const count = overrideCount || parseInt(document.getElementById("addCountSelect").value, 10) || 1;
+  const storage = state.storages.find(function(s) { return s.id === storageId; }) || state.storages[0];
+  const now = new Date().toISOString();
+
+  const existing = state.inventory.find(function(i) { return i.storage_id === storage.id && i.card_id === card.id; });
+  if (existing) {
+    existing.count += count;
+    existing.updated_at = now;
+  } else {
+    const nextId = state.inventory.reduce(function(m, i) { return Math.max(m, i.id || 0); }, 0) + 1;
+    state.inventory.unshift({
+      id: nextId,
+      storage_id: storage.id,
+      storage_name: storage.name,
+      storage_color: storage.color,
+      card_id: card.id,
+      card_name: card.name,
+      card_ruby: card.name_ruby || null,
+      card_pack: card.pack || "",
+      card_type: card.type || "",
+      card_civil: card.civil || "",
+      card_rarity: card.rarity || "",
+      card_cost: card.cost,
+      card_power: card.power || "",
+      card_race: card.race || "",
+      card_image: card.image || "",
+      card_alt_names: card.alt_names || null,
+      card_faces_json: card.faces_json || null,
+      count: count,
+      condition: "プレイ用",
+      memo: "",
+      updated_at: now
+    });
+  }
+  recentAddedCounts[card.id] = (recentAddedCounts[card.id] || 0) + count;
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+  onMasterSearch();
+  if (document.getElementById("bigSearchModal").classList.contains("open")) {
+    renderBigSearchModalResults();
+  }
+  showToast("「" + card.name + "」を " + count + "枚 追加しました (" + storage.name + ")");
+}
+
+function createStorage() {
+  const nameEl = document.getElementById("newStorageName");
+  const colorEl = document.getElementById("newStorageColor");
+  const name = nameEl.value.trim();
+  if (!name) return alert("ストレージ名を入力してください");
+  const nextId = state.storages.reduce(function(m, s) { return Math.max(m, s.id || 0); }, 0) + 1;
+  state.storages.push({ id: nextId, name: name, color: colorEl.value || "#3b82f6", memo: "", total_cards: 0, unique_cards: 0 });
+  nameEl.value = "";
+  saveState();
+  renderStorageStrip();
+  showToast("ストレージ「" + name + "」を作成しました");
+}
+
+function deleteStorage(id) {
+  const s = state.storages.find(function(x) { return x.id === id; });
+  if (!s) return;
+  if (!confirm("ストレージ「" + s.name + "」とその中のカードを削除しますか？")) return;
+  state.storages = state.storages.filter(function(x) { return x.id !== id; });
+  state.inventory = state.inventory.filter(function(i) { return i.storage_id !== id; });
+  if (selectedStorageId === id) selectedStorageId = "all";
+  saveState();
+  renderStorageStrip();
+  renderInventory();
+}
+
+function switchTab(tab) {
+  if (tab === "storages") {
+    document.getElementById("viewMain").style.display = "none";
+    document.getElementById("viewStorages").style.display = "block";
+  } else {
+    document.getElementById("viewMain").style.display = "block";
+    document.getElementById("viewStorages").style.display = "none";
+    if (tab === "add") {
+      const input = document.getElementById("masterSearchInput");
+      if (input) {
+        input.scrollIntoView({ behavior: "smooth", block: "center" });
+        input.focus();
+      }
+    } else if (tab === "inv") {
+      const invPanel = document.getElementById("inventorySectionPanel");
+      if (invPanel) invPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+  document.getElementById("navBtnInv").classList.toggle("active", tab === "inv");
+  document.getElementById("navBtnAdd").classList.toggle("active", tab === "add");
+  document.getElementById("navBtnStorages").classList.toggle("active", tab === "storages");
+}
+
+function openDetailModal(invId, faceIdx) {
+  const item = state.inventory.find(function(i) { return i.id === invId; });
+  if (!item) return closeDetailModal();
+  currentDetailInvId = invId;
+  currentDetailFaceIdx = faceIdx || 0;
+
+  let faces = [];
+  if (item.card_faces_json) {
+    try { faces = JSON.parse(item.card_faces_json); } catch (e) { faces = []; }
+  }
+  if (!Array.isArray(faces) || faces.length === 0) {
+    faces = [{
+      name: item.card_name, ruby: item.card_ruby, pack: item.card_pack, type: item.card_type,
+      civil: item.card_civil, rarity: item.card_rarity, cost: item.card_cost, power: item.card_power,
+      race: item.card_race, image: item.card_image
+    }];
+  }
+  const f = faces[Math.min(currentDetailFaceIdx, faces.length - 1)] || faces[0];
+
+  const faceButtons = faces.length > 1 ? (
+    '<div style="display:flex;justify-content:center;gap:6px;margin:8px 0;">' +
+      faces.map(function(_, idx) {
+        return '<button class="chip ' + (idx === currentDetailFaceIdx ? "active" : "") + '" onclick="openDetailModal(' + item.id + ', ' + idx + ')">' +
+          (idx === 0 ? "表面" : (faces.length > 2 ? "裏面" + idx : "裏面")) +
+        '</button>';
+      }).join("") +
+    '</div>'
+  ) : '';
+
+  const box = document.getElementById("cardDetailBox");
+  box.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+      '<span style="font-size:12px;color:#94a3b8;">保管先: <strong style="color:#fff;">' + escapeHtml(item.storage_name) + '</strong></span>' +
+      '<button class="btn" onclick="closeDetailModal()">✕ 閉じる</button>' +
+    '</div>' +
+    '<div style="text-align:center;">' +
+      '<img src="' + expandImg(f.image || item.card_image) + '" style="max-width:230px;width:100%;border-radius:14px;border:1px solid #334155;" alt="" />' +
+      faceButtons +
+      ((f.ruby || item.card_ruby) ? '<div style="font-size:11px;color:#7dd3fc;margin-top:6px;">' + escapeHtml(f.ruby || item.card_ruby) + '</div>' : '') +
+      '<h3 style="margin:4px 0;font-size:17px;">' + escapeHtml(f.name || item.card_name) + '</h3>' +
+      '<div style="font-size:12px;color:#818cf8;font-family:monospace;">' + escapeHtml(item.card_pack || "") + '</div>' +
+      '<div style="margin-top:8px;font-size:12px;color:#cbd5e1;">' +
+        '文明: ' + escapeHtml(f.civil || item.card_civil || "無色") + ' / コスト: ' + (f.cost ?? item.card_cost ?? "-") + ' / パワー: ' + escapeHtml(f.power || item.card_power || "-") +
+      '</div>' +
+      '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e293b;display:flex;justify-content:center;align-items:center;gap:14px;">' +
+        '<button class="btn-Step" onclick="changeCount(' + item.id + ', -1);openDetailModal(' + item.id + ', ' + currentDetailFaceIdx + ');">−</button>' +
+        '<span style="font-size:16px;font-weight:800;">所持: ' + item.count + '枚</span>' +
+        '<button class="btn-Step" onclick="changeCount(' + item.id + ', 1);openDetailModal(' + item.id + ', ' + currentDetailFaceIdx + ');">＋</button>' +
+      '</div>' +
+    '</div>';
+  document.getElementById("cardDetailModal").classList.add("open");
+}
+
+function closeDetailModal() { document.getElementById("cardDetailModal").classList.remove("open"); }
+function openSyncModal() {
+  const savedHost = localStorage.getItem(LS_PC_HOST_KEY) || "";
+  document.getElementById("pcHostInput").value = savedHost;
+  document.getElementById("syncModal").classList.add("open");
+}
+function closeSyncModal() { document.getElementById("syncModal").classList.remove("open"); }
+
+function normalizeHostUrl(raw) {
+  let u = String(raw || "").trim();
+  while (u.endsWith("/")) u = u.slice(0, -1);
+  if (!u) return "";
+  if (!u.startsWith("http://") && !u.startsWith("https://")) u = "http://" + u;
+  return u;
+}
+
+async function syncFromPcWifi() {
+  const host = normalizeHostUrl(document.getElementById("pcHostInput").value);
+  if (!host) return alert("PCのアドレス（例: http://192.168.1.10:3000）を入力してください");
+  localStorage.setItem(LS_PC_HOST_KEY, host);
+  try {
+    const res = await fetch(host + "/api/backup");
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data.storages) || !Array.isArray(data.inventory)) throw new Error("データ形式エラー");
+    state = { storages: data.storages, inventory: data.inventory };
+    saveState();
+    renderStorageStrip();
+    renderInventory();
+    closeSyncModal();
+    showToast("PC本体から最新データを受信しました！");
+  } catch (e) {
+    alert("PCに接続できませんでした。PCでアプリが起動しているか、同じWi-Fiか確認してください。");
+  }
+}
+
+async function syncToPcWifi() {
+  const host = normalizeHostUrl(document.getElementById("pcHostInput").value);
+  if (!host) return alert("PCのアドレス（例: http://192.168.1.10:3000）を入力してください");
+  localStorage.setItem(LS_PC_HOST_KEY, host);
+  try {
+    const res = await fetch(host + "/api/backup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ storages: state.storages, inventory: state.inventory, mode: "merge" })
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    closeSyncModal();
+    showToast("スマホのデータをPC本体へ同期しました！");
+  } catch (e) {
+    alert("PCへの送信に失敗しました。PCでアプリが起動しているか確認してください。");
+  }
+}
+
+function exportBackupJson() {
+  const payload = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), storages: state.storages, inventory: state.inventory }, null, 2);
+  const filename = "dm-vault-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  if (window.AndroidBridge && typeof window.AndroidBridge.shareJsonBackup === "function") {
+    window.AndroidBridge.shareJsonBackup(payload, filename);
+    return;
+  }
+  const blob = new Blob([payload], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  showToast("JSONバックアップを書き出しました");
+}
+
+function importBackupJson(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function() {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!Array.isArray(parsed.storages) || !Array.isArray(parsed.inventory)) throw new Error("形式エラー");
+      state = { storages: parsed.storages, inventory: parsed.inventory };
+      saveState();
+      renderStorageStrip();
+      renderInventory();
+      closeSyncModal();
+      showToast("バックアップデータを読み込みました！");
+    } catch (e) {
+      alert("JSONファイルの読み込みに失敗しました");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function escapeHtml(str) {
+  return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+window.__handleAndroidBack = function() {
+  if (document.getElementById("bigSearchModal").classList.contains("open")) {
+    closeBigSearchModal();
+    return true;
+  }
+  if (document.getElementById("cardDetailModal").classList.contains("open")) {
+    closeDetailModal();
+    return true;
+  }
+  if (document.getElementById("syncModal").classList.contains("open")) {
+    closeSyncModal();
+    return true;
+  }
+  if (document.getElementById("viewStorages").style.display !== "none") {
+    switchTab("inv");
+    return true;
+  }
+  return false;
+};
+
+updateHeaderStats();
+renderStorageStrip();
+renderFilterBars();
+renderInventory();
+initCardsDb();
+</script>
+</body>
+</html>
+

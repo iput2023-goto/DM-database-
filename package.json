@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "sync-cards": "node scripts/sync_all_cards.js"
+    "sync-cards": "node scripts/sync_all_cards.js",
+    "export-portable": "node scripts/generate_portable_html.js"
   },
   "dependencies": {
     "better-sqlite3": "^11.8.1",

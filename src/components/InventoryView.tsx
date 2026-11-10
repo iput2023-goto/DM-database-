@@ -35,7 +35,7 @@ interface InventoryViewProps {
   selectedStorageId: number | 'all';
   onUpdateCount: (id: number, newCount: number) => void;
   onDeleteItem: (id: number) => void;
-  onClearStorage?: (storageId: number | 'all') => void;
+  onClearStorageCards?: (storageId: number | 'all') => void;
   onSelectCardDetail?: (item: InventoryItem) => void;
 }
 
@@ -157,7 +157,7 @@ export default function InventoryView({
   selectedStorageId,
   onUpdateCount,
   onDeleteItem,
-  onClearStorage,
+  onClearStorageCards,
   onSelectCardDetail,
 }: InventoryViewProps) {
   const [filterQuery, setFilterQuery] = useState('');
@@ -168,6 +168,7 @@ export default function InventoryView({
   const [sortBy, setSortBy] = useState<SortKey>('cost_asc');
   const [groupBy, setGroupBy] = useState<GroupByKey>('none');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
 
   // 削除時の確認ポップアップON/OFF設定（localStorageで永続化）
   const [confirmDelete, setConfirmDelete] = useState<boolean>(() => {
@@ -175,17 +176,23 @@ export default function InventoryView({
       const saved = localStorage.getItem('dm_vault_confirm_delete');
       if (saved !== null) return saved === 'true';
     }
-    return true; // デフォルトは安全のためON
+    return true;
   });
 
-  const [isClearing, setIsClearing] = useState(false);
-
-  // 確認ポップアップ設定の変更
   const handleToggleConfirmDelete = (val: boolean) => {
     setConfirmDelete(val);
     if (typeof window !== 'undefined') {
       localStorage.setItem('dm_vault_confirm_delete', String(val));
     }
+  };
+
+  const handleCardDelete = (item: InventoryItem) => {
+    if (confirmDelete) {
+      if (!confirm(`「${item.card_name}」を保管リストから削除しますか？`)) {
+        return;
+      }
+    }
+    onDeleteItem(item.id);
   };
 
   const currentStorage = useMemo(() => {
@@ -394,34 +401,6 @@ export default function InventoryView({
     setFilterQuery('');
   };
 
-  // 個別カード削除ハンドラー（confirmDelete設定に連動）
-  const handleCardDelete = (item: InventoryItem) => {
-    if (confirmDelete) {
-      if (!confirm(`「${item.card_name}」を保管リストから削除しますか？`)) {
-        return;
-      }
-    }
-    onDeleteItem(item.id);
-  };
-
-  // ストレージ内のカード全削除ハンドラー
-  const handleClearCurrentStorage = async () => {
-    if (!onClearStorage) return;
-
-    const storageName = currentStorage ? `ストレージ「${currentStorage.name}」` : 'すべてのストレージ';
-    const countText = totalFilteredCards > 0 ? `（合計 ${totalFilteredCards}枚）` : '';
-    const confirmMsg = `${storageName} にあるカード${countText}をすべて削除しますか？\n※この操作は取り消せません。`;
-
-    if (!confirm(confirmMsg)) return;
-
-    setIsClearing(true);
-    try {
-      await onClearStorage(selectedStorageId);
-    } finally {
-      setIsClearing(false);
-    }
-  };
-
   return (
     <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
       {/* 上部ヘッダー & コントロール */}
@@ -444,9 +423,8 @@ export default function InventoryView({
           )}
         </div>
 
-        {/* 検索・表示切り替え・削除確認設定・全削除 */}
+        {/* 検索・表示切り替え */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* 削除確認ポップアップのON/OFF */}
           <label
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white cursor-pointer select-none transition"
             title="チェックを外すと、カードのゴミ箱アイコンを押した際に確認ポップアップを出さず直接削除します"
@@ -459,24 +437,6 @@ export default function InventoryView({
             />
             <span>削除時の確認</span>
           </label>
-
-          {/* ストレージ内カード全削除ボタン */}
-          {onClearStorage && (
-            <button
-              type="button"
-              disabled={filteredAndSortedItems.length === 0 || isClearing}
-              onClick={handleClearCurrentStorage}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/50 hover:border-red-700 text-[11px] font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              title={
-                currentStorage
-                  ? `「${currentStorage.name}」内のカードをすべて削除`
-                  : 'すべての保管カードを一括全削除'
-              }
-            >
-              <Trash2 className="w-3.5 h-3.5 text-red-400" />
-              <span>{currentStorage ? 'このストレージを空にする' : '全カードを削除'}</span>
-            </button>
-          )}
 
           <div className="relative w-44 sm:w-56">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -509,11 +469,69 @@ export default function InventoryView({
               <List className="w-4 h-4" />
             </button>
           </div>
+
+          {onClearStorageCards && totalFilteredCards > 0 && (
+            <button
+              type="button"
+              onClick={() => onClearStorageCards(selectedStorageId)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/70 hover:bg-red-900/80 border border-red-700/60 text-red-300 hover:text-white text-xs font-bold transition shadow-sm"
+              title={
+                currentStorage
+                  ? `「${currentStorage.name}」内のカードをすべて削除する`
+                  : 'すべてのストレージの保管カードを一括削除する'
+              }
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{currentStorage ? 'ストレージ内を全削除' : '全カード一括削除'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* スマホ向けクイック文明バー & 詳細フィルター開閉ボタン */}
+      <div className="md:hidden space-y-2 mb-3 pb-2.5 border-b border-slate-800/80">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          {civilFilters.map((cf) => (
+            <button
+              key={cf.value}
+              onClick={() => setSelectedCivil(cf.value)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+                selectedCivil === cf.value
+                  ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                  : 'bg-slate-800/70 border-slate-700/70 text-slate-400'
+              }`}
+            >
+              {cf.value === 'all' ? '全文明' : cf.label}
+            </button>
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setShowMobileFilters((v) => !v)}
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition ${
+              showMobileFilters || hasActiveFilters
+                ? 'bg-indigo-600/20 border-indigo-500/60 text-indigo-200'
+                : 'bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>{showMobileFilters ? '詳細フィルター・並び順を閉じる ▲' : '詳細フィルター・並び順を開く ▼'}</span>
+          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="py-1.5 px-2.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800 border border-slate-700 shrink-0"
+            >
+              リセット
+            </button>
+          )}
         </div>
       </div>
 
       {/* 並び替え（ソート）＆ グループ分けバー */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/80">
+      <div className={`${showMobileFilters ? 'flex' : 'hidden md:flex'} flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/80`}>
         {/* 並び替えボタン群 */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 font-medium">
@@ -636,7 +654,7 @@ export default function InventoryView({
       </div>
 
       {/* フィルター群（カードタイプ・コスト・文明） */}
-      <div className="space-y-2.5 mb-4 pb-3 border-b border-slate-800/80">
+      <div className={`${showMobileFilters ? 'block' : 'hidden md:block'} space-y-2.5 mb-4 pb-3 border-b border-slate-800/80`}>
         {/* カードタイプフィルター */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
@@ -852,26 +870,26 @@ export default function InventoryView({
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => onUpdateCount(item.id, item.count - 1)}
-                                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                  className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition border border-slate-700/80"
                                   title="1枚減らす"
                                 >
-                                  <Minus className="w-3 h-3" />
+                                  <Minus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                                 </button>
-                                <span className="font-bold text-xs w-6 text-center text-white">
+                                <span className="font-bold text-xs sm:text-xs w-6 text-center text-white">
                                   {item.count}
                                 </span>
                                 <button
                                   onClick={() => onUpdateCount(item.id, item.count + 1)}
-                                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                  className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition border border-slate-700/80"
                                   title="1枚増やす"
                                 >
-                                  <Plus className="w-3 h-3" />
+                                  <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                                 </button>
                               </div>
 
                               <button
                                 onClick={() => handleCardDelete(item)}
-                                className="p-1 text-slate-500 hover:text-red-400 transition"
+                                className="p-1.5 sm:p-1 text-slate-500 hover:text-red-400 transition"
                                 title="保管から削除"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
