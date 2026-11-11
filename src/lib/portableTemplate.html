@@ -1240,6 +1240,22 @@ function normalizeHostUrl(raw) {
   return u;
 }
 
+function applyFullStateRefresh(toastMsg) {
+  selectedStorageId = "all";
+  filterCost = null;
+  filterCivilizations = [];
+  filterRarity = null;
+  filterType = null;
+  const sInput = document.getElementById("invSearch");
+  if (sInput) sInput.value = "";
+  updateHeaderStats();
+  renderStorageStrip();
+  renderFilterBars();
+  renderInventory();
+  renderStorageManager();
+  if (toastMsg) showToast(toastMsg);
+}
+
 async function syncFromPcWifi() {
   const host = normalizeHostUrl(document.getElementById("pcHostInput").value);
   if (!host) return alert("PCのアドレス（例: http://192.168.1.10:3000）を入力してください");
@@ -1251,10 +1267,12 @@ async function syncFromPcWifi() {
     if (!Array.isArray(data.storages) || !Array.isArray(data.inventory)) throw new Error("データ形式エラー");
     state = { storages: data.storages, inventory: data.inventory };
     saveState();
-    renderStorageStrip();
-    renderInventory();
     closeSyncModal();
-    showToast("PC本体から最新データを受信しました！");
+    applyFullStateRefresh("PC本体から最新データを受信しました！");
+    setTimeout(() => {
+      updateHeaderStats();
+      renderInventory();
+    }, 150);
   } catch (e) {
     alert("PCに接続できませんでした。PCでアプリが起動しているか、同じWi-Fiか確認してください。");
   }
@@ -1272,7 +1290,7 @@ async function syncToPcWifi() {
     });
     if (!res.ok) throw new Error("HTTP " + res.status);
     closeSyncModal();
-    showToast("スマホのデータをPC本体へ同期しました！");
+    applyFullStateRefresh("スマホのデータをPC本体へ同期しました！");
   } catch (e) {
     alert("PCへの送信に失敗しました。PCでアプリが起動しているか確認してください。");
   }
@@ -1303,10 +1321,8 @@ function importBackupJson(ev) {
       if (!Array.isArray(parsed.storages) || !Array.isArray(parsed.inventory)) throw new Error("形式エラー");
       state = { storages: parsed.storages, inventory: parsed.inventory };
       saveState();
-      renderStorageStrip();
-      renderInventory();
       closeSyncModal();
-      showToast("バックアップデータを読み込みました！");
+      applyFullStateRefresh("バックアップデータを読み込みました！");
     } catch (e) {
       alert("JSONファイルの読み込みに失敗しました");
     }
@@ -1344,6 +1360,21 @@ renderStorageStrip();
 renderFilterBars();
 renderInventory();
 initCardsDb();
+
+window.addEventListener("focus", () => {
+  state = loadState();
+  updateHeaderStats();
+  renderStorageStrip();
+  renderInventory();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    state = loadState();
+    updateHeaderStats();
+    renderStorageStrip();
+    renderInventory();
+  }
+});
 </script>
 </body>
 </html>

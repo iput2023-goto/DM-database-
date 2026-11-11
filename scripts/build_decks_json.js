@@ -841,14 +841,26 @@ const OTHER_NAMED_DECKS = [
   ['DMD13', 'DMD-13', 'スーパーデッキMAX カツキングと伝説の秘宝', ['カツキングと伝説の秘宝']],
 ];
 
+// Load precomputed major deck recipes from Takaratomy / dmwiki
+let MAJOR_DECK_RECIPES = {};
+try {
+  MAJOR_DECK_RECIPES = JSON.parse(fs.readFileSync(path.join(__dirname, 'major_deck_recipes.json'), 'utf8'));
+} catch (e) {
+  console.warn('Could not load major_deck_recipes.json:', e.message);
+}
+
 for (const [packPrefix, code, name, aliases] of OTHER_NAMED_DECKS) {
-  MANUAL_DECKS.push({
+  const deckDef = {
     id: packPrefix,
     code,
     name,
     aliases: [name, code, packPrefix, ...aliases],
     packPrefix,
-  });
+  };
+  if (MAJOR_DECK_RECIPES[packPrefix]) {
+    deckDef.counts = MAJOR_DECK_RECIPES[packPrefix];
+  }
+  MANUAL_DECKS.push(deckDef);
 }
 
 // Build final deck list with resolved cards & counts

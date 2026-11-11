@@ -65,6 +65,25 @@ export default function Home() {
   useEffect(() => {
     refreshAll();
 
+    // Auto-refresh when user focuses or returns to PC browser window
+    const handleFocus = () => {
+      refreshAll();
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshAll();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Periodic auto-sync every 4 seconds when page is active (reflects phone sync immediately without reloading)
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        refreshAll();
+      }
+    }, 4000);
+
     // Register Service Worker & background-cache 24,049 card dictionary for offline smartphone use
     if (typeof window !== 'undefined') {
       if ('serviceWorker' in navigator) {
@@ -76,6 +95,12 @@ export default function Home() {
         }
       });
     }
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(intervalId);
+    };
   }, [refreshAll]);
 
   // Keep modal card count in sync when inventory updates

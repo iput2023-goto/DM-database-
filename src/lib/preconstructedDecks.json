@@ -3682,12 +3682,12 @@
       {
         "id": "dm23sd1-002",
         "name": "ボルシャック・モルナルク",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23sd1-003",
         "name": "メテオキャノン・ドラゴン",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd1-004",
@@ -3722,17 +3722,17 @@
       {
         "id": "dm23sd1-010",
         "name": "コッコ・ルピア GS",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd1-011",
         "name": "ザーク・砲・ピッチ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd1-012",
         "name": "ファイン・撃・ピヨッチ / 「暴竜爵は不滅なり！」",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd1-013",
@@ -3742,7 +3742,7 @@
       {
         "id": "dm23sd1-014",
         "name": "アシスター・コッピ",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -3769,22 +3769,22 @@
       {
         "id": "dm23sd2-002",
         "name": "聖沌大忍者 ハラギャティ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23sd2-003",
         "name": "水雲の聖沌 5u170n",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd2-004",
         "name": "星姫械 シリエス",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd2-005",
         "name": "警鐘の聖沌 n4rc0",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd2-006",
@@ -3794,7 +3794,7 @@
       {
         "id": "dm23sd2-007",
         "name": "煙幕の聖沌 k3mur1 / 聖沌忍法 メカくしの術",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd2-008",
@@ -3809,22 +3809,22 @@
       {
         "id": "dm23sd2-010",
         "name": "忍瞬の聖沌 53nju",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd2-011",
         "name": "光牙忍ハヤブサマル",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm23sd2-012",
         "name": "アシスター・アルデ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd2-013",
         "name": "忍防の聖沌 h4990u",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd2-014",
@@ -3856,7 +3856,7 @@
       {
         "id": "dm23sd3-002",
         "name": "瞬閃と疾駆と双撃の決断",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23sd3-003",
@@ -3866,12 +3866,12 @@
       {
         "id": "dm23sd3-004",
         "name": "B.F.F. モーメント",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dm23sd3-005",
         "name": "調律師ピーカプ / ♪音速で 本番中に チューニング",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm23sd3-006",
@@ -3881,7 +3881,7 @@
       {
         "id": "dm23sd3-007",
         "name": "淡いと濃い ケローラ / ♪やせガエル 負けるなケローラ スパイラル",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd3-008",
@@ -3891,12 +3891,12 @@
       {
         "id": "dm23sd3-009",
         "name": "紅奏龍メルダウ",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd3-010",
         "name": "芸魔土車 チャトランガ",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23sd3-011",
@@ -3916,7 +3916,7 @@
       {
         "id": "dm23sd3-014",
         "name": "アシスター・Mogi林檎",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23sd3-015",
@@ -3936,148 +3936,98 @@
       "禁王創来",
       "きんおうそうらい"
     ],
-    "totalCards": 40,
-    "uniqueCards": 38,
+    "totalCards": 50,
+    "uniqueCards": 28,
     "cards": [
       {
         "id": "dm23bd1-001",
         "name": "新世界王の権威",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-002",
         "name": "新世界王の思想",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-003",
         "name": "新世界王の闘気",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-004",
         "name": "頂災混成 セーゼン・ザ・フメイト",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-005",
         "name": "頂竜連結 バジュエン・ザ・ローラ",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-006",
         "name": "鎧道接続 キング・マルバディアス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-007",
         "name": "終末縫合王 ザ=キラー・キーナリー",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-008",
         "name": "真槍電融 ソウル・ヴァイラックス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-009",
         "name": "灰燼と天門の儀式",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-010",
         "name": "ロスト・Re:ソウル",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-011",
         "name": "覇王 スカール-1",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-012",
         "name": "妖精 ミンメイ-1",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-013",
         "name": "霊宝 ヒャクメ-４",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-014",
         "name": "天災 デドダム",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm23bd1-015",
         "name": "Disジルコン",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-016",
         "name": "大地門ライフ・ゲート",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-017",
         "name": "Disコットン＆Disケラサス",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm23bd1-018",
         "name": "地龍神の魔陣",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE001",
-        "name": "龍風混成 ザーディクリカ",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE002",
-        "name": "頂災混成 セーゼン・ザ・フメイト",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE003",
-        "name": "頂竜連結 バジュエン・ザ・ローラ",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE004",
-        "name": "砕慄接続 グレイトフル・ベン",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE005",
-        "name": "鎧道接続 キング・マルバディアス",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE006",
-        "name": "終末縫合王 ザ=キラー・キーナリー",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE007",
-        "name": "真槍電融 ソウル・ヴァイラックス",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE008",
-        "name": "覇王 スカール-1",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE009",
-        "name": "妖精 ミンメイ-1",
-        "count": 1
-      },
-      {
-        "id": "dm23bd1-BE010",
-        "name": "Disコットン＆Disケラサス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm23bd1-SE001",
@@ -4122,12 +4072,12 @@
       {
         "id": "dm23bd1-SE009",
         "name": "覚醒連結 XXDDZ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd1-SE010",
         "name": "星魂接続 パーフェクト・ワールド",
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -4149,22 +4099,22 @@
       {
         "id": "dm23bd2-001",
         "name": "百鬼の邪王門",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm23bd2-002",
         "name": "鬼ヶ大王 ジャオウガ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd2-003",
         "name": "禁断の轟速 ブラックゾーン",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd2-004",
         "name": "鬼ヶ邪王 ジャオウガ・ゼロ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd2-005",
@@ -4174,7 +4124,7 @@
       {
         "id": "dm23bd2-006",
         "name": "鬼ヶ羅刹 ジャオウガ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd2-007",
@@ -4184,37 +4134,37 @@
       {
         "id": "dm23bd2-008",
         "name": "「大蛇」の鬼 ジャドク丸",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm23bd2-009",
         "name": "鬼ヶ英悪 ジャオウガOG",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd2-010",
         "name": "「貪」の鬼 バクロ法師",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd2-011",
         "name": "コッコ・武・ルピア",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23bd2-012",
         "name": "龍装者 バルチュリス",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm23bd2-013",
         "name": "カンゴク入道",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd2-014",
         "name": "影速 ザ・トリッパー",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd2-015",
@@ -4224,7 +4174,7 @@
       {
         "id": "dm23bd2-016",
         "name": "斬斬人形コダマンマ GS",
-        "count": 3
+        "count": 2
       }
     ]
   },
@@ -4246,17 +4196,17 @@
       {
         "id": "dm23bd3-001",
         "name": "SSS級天災 デッドダムド",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dm23bd3-002",
         "name": "CRYMAX ジャオウガ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd3-003",
         "name": "絶望と反魂と滅殺の決断",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd3-004",
@@ -4266,7 +4216,7 @@
       {
         "id": "dm23bd3-005",
         "name": "イグゾースト・Ⅱ・フォー",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm23bd3-006",
@@ -4276,52 +4226,52 @@
       {
         "id": "dm23bd3-007",
         "name": "秩序の意志",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dm23bd3-008",
         "name": "天災 デドダム",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dm23bd3-009",
         "name": "Disジルコン",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23bd3-010",
         "name": "飛ベル津バサ「曲通風」",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd3-011",
         "name": "学校男 / ゾンビ・カーニバル",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23bd3-012",
         "name": "特攻人形ジェニー",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm23bd3-013",
         "name": "若き大長老 アプル",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd3-014",
         "name": "有象夢造",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd3-015",
         "name": "悪魔妖精ベラドンナ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm23bd3-016",
         "name": "樹界の守護車 アイオン・ユピテル",
-        "count": 3
+        "count": 2
       }
     ]
   },
@@ -5609,7 +5559,7 @@
       {
         "id": "dm22sd1-002",
         "name": "カップ=ギャラップ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm22sd1-003",
@@ -5619,22 +5569,22 @@
       {
         "id": "dm22sd1-004",
         "name": "ハンマ＝ダンマ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22sd1-005",
         "name": "ベル＝ゲルエール",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22sd1-006",
         "name": "スーパー・デーモン・ハンド",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22sd1-007",
         "name": "ナイフ＝アライフ",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22sd1-008",
@@ -5644,12 +5594,12 @@
       {
         "id": "dm22sd1-009",
         "name": "学校男",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22sd1-010",
         "name": "フォーク＝フォック",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22sd1-011",
@@ -5659,17 +5609,17 @@
       {
         "id": "dm22sd1-012",
         "name": "特攻人形ジェニー",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22sd1-013",
         "name": "深淵の食卓",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22sd1-014",
         "name": "オタカラ・アッタカラ",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -5684,8 +5634,8 @@
       "龍覇爆炎",
       "りゅうはばくえん"
     ],
-    "totalCards": 40,
-    "uniqueCards": 29,
+    "totalCards": 48,
+    "uniqueCards": 19,
     "cards": [
       {
         "id": "dm22bd1-001",
@@ -5730,107 +5680,57 @@
       {
         "id": "dm22bd1-009",
         "name": "超戦龍覇 モルトNEXT",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-010",
         "name": "爆炎龍覇 モルトSAGA",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-011",
         "name": "炎龍覇 グレンアイラ / 「助けて！モルト!!」",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-012",
         "name": "次世代龍覇 グレングラッサ / 「ここはまかせて、お姉ちゃん！」",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dm22bd1-013",
         "name": "爆龍覇 グレンリベット / 「爆流秘術、暴龍の大地！」",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-014",
         "name": "爆流奥義 紅蓮NEXTREME",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-015",
         "name": "メンデルスゾーン",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-016",
         "name": "雷龍 ヴァリヴァリウス",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dm22bd1-017",
         "name": "轟牙忍 ハヤブサリュウ",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dm22bd1-018",
         "name": "爆裂遺跡シシオー・カイザー",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dm22bd1-019",
         "name": "ボルシャック・栄光・ルピア",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE1",
-        "name": "炎龍覇 グレンアイラ / 「助けて！モルト!!」",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE10",
-        "name": "ボルシャック・栄光・ルピア",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE2",
-        "name": "爆炎龍覇 モルトSAGA",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE3",
-        "name": "爆炎大剣 ガイサーガ",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE4",
-        "name": "次世代龍覇 グレングラッサ / 「ここはまかせて、お姉ちゃん！」",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE5",
-        "name": "爆龍覇 グレンリベット / 「爆流秘術、暴龍の大地！」",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE6",
-        "name": "爆流奥義 紅蓮NEXTREME",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE7",
-        "name": "メンデルスゾーン",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE8",
-        "name": "超戦龍覇 モルトNEXT",
-        "count": 2
-      },
-      {
-        "id": "dm22bd1-BE9",
-        "name": "爆銀王剣 バトガイ刃斗",
-        "count": 2
+        "count": 4
       }
     ]
   },
@@ -5857,12 +5757,12 @@
       {
         "id": "dm22bd2-002",
         "name": "単騎連射 マグナム",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm22bd2-003",
         "name": "エヴォ・ルピア",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm22bd2-004",
@@ -5872,7 +5772,7 @@
       {
         "id": "dm22bd2-005",
         "name": "「正義星帝」 ＜鬼羅.Star＞",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm22bd2-006",
@@ -5897,42 +5797,42 @@
       {
         "id": "dm22bd2-010",
         "name": "正義の煌き オーリリア",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm22bd2-011",
         "name": "機術士ディール / 「本日のラッキーナンバー！」",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dm22bd2-012",
         "name": "蒼狼の大王 イザナギテラス",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22bd2-013",
         "name": "奇天烈 シャッフ",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm22bd2-014",
         "name": "瞬閃と疾駆と双撃の決断",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22bd2-015",
         "name": "奇石 ミクセル / ジャミング・チャフ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd2-016",
         "name": "T・T・T",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd2-017",
         "name": "赤い稲妻 テスタ・ロッサ",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -5957,57 +5857,57 @@
       {
         "id": "dm22bd3-002",
         "name": "レレディ・バ・グーバ / ツインパクト・マップ",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dm22bd3-003",
         "name": "ガチャンコ　ガチロボ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd3-004",
         "name": "天命龍装 ホーリーエンド / ナウ・オア・ネバー",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm22bd3-005",
         "name": "DOOOPPLER・マクーレ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd3-006",
         "name": "ボルバルザーク・エクス",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm22bd3-007",
         "name": "轟く革命 レッドギラゾーン",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22bd3-008",
         "name": "R.S.F.K. / オールイン・チャージャー",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd3-009",
         "name": "メヂカラ・コバルト・カイザー / アイド・ワイズ・シャッター",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd3-010",
         "name": "覚醒連結 XXDDZ",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dm22bd3-011",
         "name": "サイバー・I・チョイス",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dm22bd3-012",
         "name": "闘争類拳嘩目 ステゴロ・カイザー / お清めシャラップ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dm22bd3-013",
@@ -6017,7 +5917,7 @@
       {
         "id": "dm22bd3-014",
         "name": "イチゴッチ・タンク / レッツ・ゴイチゴ",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -6032,8 +5932,8 @@
       "零誕",
       "ぜろたん"
     ],
-    "totalCards": 40,
-    "uniqueCards": 25,
+    "totalCards": 48,
+    "uniqueCards": 18,
     "cards": [
       {
         "id": "dmbd22-001",
@@ -6068,47 +5968,47 @@
       {
         "id": "dmbd22-007",
         "name": "凶鬼000号 ゼロヴォイド",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd22-008",
         "name": "ヘルエグリゴリ-零式",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd22-009",
         "name": "ドドド・ドーピードープ",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd22-010",
         "name": "暗黒の騎士ザガーン GR",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd22-011",
         "name": "ロッキーロック",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd22-012",
         "name": "甲殻 TS-10",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd22-013",
         "name": "トムライ 丙-三式",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd22-014",
         "name": "龍月 ドラグ・スザーク / 龍・獄・殺",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd22-015",
         "name": "龍頭星雲人 / 零誕祭",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd22-016",
@@ -6118,47 +6018,12 @@
       {
         "id": "dmbd22-017",
         "name": "ビックリーノ",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd22-018",
         "name": "龍装鬼 オブザ08号 / 終焉の開闢",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-019",
-        "name": "闇王ゼーロ",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-020",
-        "name": "堕魔 ドゥポイズ",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-021",
-        "name": "暗黒鎧 ザロスト",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-022",
-        "name": "罪無 ターボ兆",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-023",
-        "name": "戦略のＤ・Ｈ アツト",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-024",
-        "name": "戯具 ドゥゲンダ",
-        "count": 2
-      },
-      {
-        "id": "dmbd22-025",
-        "name": "【問２】ノロン&#x2934",
-        "count": 2
+        "count": 3
       }
     ]
   },
@@ -6173,7 +6038,7 @@
       "終焉",
       "しゅうえん"
     ],
-    "totalCards": 40,
+    "totalCards": 49,
     "uniqueCards": 23,
     "cards": [
       {
@@ -6184,7 +6049,7 @@
       {
         "id": "dmbd21-006",
         "name": "時空の禁断 レッドゾーンX",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd21-007",
@@ -6194,7 +6059,7 @@
       {
         "id": "dmbd21-008",
         "name": "STARSCREAM -ALT MODE-",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd21-009",
@@ -6209,37 +6074,37 @@
       {
         "id": "dmbd21-011",
         "name": "時空の霊魔シュヴァル",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd21-012",
         "name": "D２V３ 終断のデッドトロン / デッドリー・ビッグバン",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd21-013",
         "name": "終断γ ドルブロ / ボーンおどり・チャージャー",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd21-014",
         "name": "D２V３ 終断のレッドトロン / フォビドゥン・ハンド",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd21-015",
         "name": "終断χ ベガスランチャー",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd21-016",
         "name": "超次元バサラ・ホール",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd21-017",
         "name": "Dの終断 ドルマゲドン・エリア",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd21-018",
@@ -6249,37 +6114,37 @@
       {
         "id": "dmbd21-019",
         "name": "大魔王 ウラギリダムス",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd21-020",
         "name": "メガ・マグマ・ドラゴン",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd21-021",
         "name": "威牙の幻ハンゾウ",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd21-022",
         "name": "絶叫の悪魔龍 イーヴィル・ヒート",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd21-023",
         "name": "禁断V キザム",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd21-024",
         "name": "スラッシュ・チャージャー",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd21-025",
         "name": "終断Δ ドルハカバ",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd21-026",
@@ -6289,7 +6154,7 @@
       {
         "id": "dmbd21-027",
         "name": "光牙忍ハヤブサマル",
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -6310,12 +6175,12 @@
       {
         "id": "dmbd20-001",
         "name": "ガル・ラガンザーク",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd20-002",
         "name": "卍 デ・スザーク 卍",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dmbd20-003",
@@ -6325,17 +6190,17 @@
       {
         "id": "dmbd20-004",
         "name": "絶望と反魂と滅殺の決断",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmbd20-005",
         "name": "堕魔 ヴォガイガ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd20-006",
         "name": "堕魔 ドゥポイズ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd20-007",
@@ -6345,12 +6210,12 @@
       {
         "id": "dmbd20-008",
         "name": "堕魔 ドゥリンリ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd20-009",
         "name": "追憶人形ラビリピト",
-        "count": 4
+        "count": 3
       },
       {
         "id": "dmbd20-010",
@@ -6386,72 +6251,72 @@
       {
         "id": "dmbd19-001",
         "name": "切札勝太&カツキング ー熱血の物語ー",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd19-002",
         "name": "“轟轟轟”ブランド",
-        "count": 2
+        "count": 1
       },
       {
         "id": "dmbd19-003",
         "name": "勝利龍装 クラッシュ“覇道”",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-004",
         "name": "ウマキン☆プロジェクト",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmbd19-005",
         "name": "奇天烈 シャッフ",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmbd19-006",
         "name": "伝説演者 カメヲロォル",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-007",
         "name": "終末の時計 ザ・クロック",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-008",
         "name": "“必駆”蛮触礼亞",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-009",
         "name": "Disノメノン",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-010",
         "name": "ドンドン火噴くナウ",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-011",
         "name": "異端流し オニカマス",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd19-012",
         "name": "サイバー・ブレイン",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dmbd19-013",
         "name": "海底鬼面城",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dmbd19-014",
         "name": "龍装者 バルチュリス",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -6467,41 +6332,21 @@
       "しんかりょうらん"
     ],
     "totalCards": 40,
-    "uniqueCards": 34,
+    "uniqueCards": 14,
     "cards": [
       {
         "id": "dmbd18-001",
         "name": "神歌の歌姫 アマテラス・キリコ",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd18-002",
         "name": "蒼狼の大王 イザナギテラス",
-        "count": 1
+        "count": 4
       },
       {
-        "id": "dmbd18-003",
-        "name": "八頭竜 ACE-Yamata / 神秘の宝剣",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-004",
-        "name": "蒼狼の王妃 イザナミテラス",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-005",
-        "name": "神歌と繚嵐の扉",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-006",
-        "name": "暴嵐竜 Susano-O-Dragon",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-007",
-        "name": "幻緑の双月 / 母なる星域",
+        "id": "dmbd18-012",
+        "name": "ホーガン・ブラスター",
         "count": 1
       },
       {
@@ -6510,133 +6355,53 @@
         "count": 1
       },
       {
-        "id": "dmbd18-009",
-        "name": "ドンドン水撒くナウ",
-        "count": 1
-      },
-      {
         "id": "dmbd18-010",
         "name": "ボルメテウス・サファイア・ドラゴン",
-        "count": 1
+        "count": 3
       },
       {
-        "id": "dmbd18-011",
-        "name": "フェアリー・シャワー",
-        "count": 1
+        "id": "dmbd18-003",
+        "name": "八頭竜 ACE-Yamata / 神秘の宝剣",
+        "count": 3
       },
       {
-        "id": "dmbd18-012",
-        "name": "ホーガン・ブラスター",
-        "count": 1
+        "id": "dmbd18-007",
+        "name": "幻緑の双月 / 母なる星域",
+        "count": 2
       },
       {
         "id": "dmbd18-013",
         "name": "フェアリー・ライフ",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd18-014",
         "name": "フェアリー・Re:ライフ",
-        "count": 1
+        "count": 4
       },
       {
-        "id": "dmbd18-be01",
-        "name": "神歌の歌姫 アマテラス・キリコ",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be02",
-        "name": "蒼狼の大王 イザナギテラス",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be03",
+        "id": "dmbd18-004",
         "name": "蒼狼の王妃 イザナミテラス",
-        "count": 1
+        "count": 4
       },
       {
-        "id": "dmbd18-be04",
+        "id": "dmbd18-005",
         "name": "神歌と繚嵐の扉",
-        "count": 1
+        "count": 3
       },
       {
-        "id": "dmbd18-be05",
+        "id": "dmbd18-009",
+        "name": "ドンドン水撒くナウ",
+        "count": 2
+      },
+      {
+        "id": "dmbd18-011",
+        "name": "フェアリー・シャワー",
+        "count": 4
+      },
+      {
+        "id": "dmbd18-006",
         "name": "暴嵐竜 Susano-O-Dragon",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be06",
-        "name": "龍世界 ドラゴ大王",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be07",
-        "name": "「修羅」の頂 VAN・ベートーベン",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be08",
-        "name": "龍仙ロマネスク",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be09",
-        "name": "ボルメテウス・サファイア・ドラゴン",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-be10",
-        "name": "スローリー・チェーン",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-se01",
-        "name": "怒流牙 サイゾウミスト",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-se02",
-        "name": "龍世界 ドラゴ大王",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-se03",
-        "name": "「修羅」の頂 VAN・ベートーベン",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-se04",
-        "name": "界王類絶対目 ワルド・ブラッキオ",
-        "count": 1
-      },
-      {
-        "id": "dmbd18-se05",
-        "name": "龍仙ロマネスク",
-        "count": 2
-      },
-      {
-        "id": "dmbd18-se06",
-        "name": "不滅の精霊パーフェクト・ギャラクシー",
-        "count": 2
-      },
-      {
-        "id": "dmbd18-se07",
-        "name": "斬隠オロチ",
-        "count": 2
-      },
-      {
-        "id": "dmbd18-se08",
-        "name": "ポジトロン・サイン",
-        "count": 2
-      },
-      {
-        "id": "dmbd18-se09",
-        "name": "スローリー・チェーン",
-        "count": 2
-      },
-      {
-        "id": "dmbd18-se10",
-        "name": "フェアリー・ギフト",
         "count": 2
       }
     ]
@@ -6653,127 +6418,77 @@
       "熱血アウトレイジビクトリー"
     ],
     "totalCards": 40,
-    "uniqueCards": 24,
+    "uniqueCards": 14,
     "cards": [
       {
-        "id": "dmbd17-001",
-        "name": "戦武の無限皇 ジャッキー / 「俺たちの夢は終わらねぇ！」",
-        "count": 1
+        "id": "dmbd17-004",
+        "name": "龍装艦 チェンジザ / 六奇怪の四 ～土を割る逆瀧～",
+        "count": 2
       },
       {
-        "id": "dmbd17-002",
-        "name": "熱血武闘 カツキング",
+        "id": "dmbd17-008",
+        "name": "裏斬の取引 パルサー",
+        "count": 4
+      },
+      {
+        "id": "dmbd17-012",
+        "name": "終末の時計 ザ・クロック",
+        "count": 4
+      },
+      {
+        "id": "dmbd17-013",
+        "name": "一なる部隊 イワシン",
+        "count": 4
+      },
+      {
+        "id": "dmbd17-005",
+        "name": "龍装鬼 オブザ08号 / 終焉の開闢",
+        "count": 3
+      },
+      {
+        "id": "dmbd17-009",
+        "name": "冥界の不死帝 ブルース /「迷いはない。俺の成すことは決まった」",
+        "count": 3
+      },
+      {
+        "id": "dmbd17-014",
+        "name": "盗掘人形モールス",
         "count": 1
       },
       {
         "id": "dmbd17-003",
         "name": "暴走龍 5000GT",
-        "count": 1
-      },
-      {
-        "id": "dmbd17-004",
-        "name": "龍装艦 チェンジザ / 六奇怪の四 ～土を割る逆瀧～",
-        "count": 1
-      },
-      {
-        "id": "dmbd17-005",
-        "name": "龍装鬼 オブザ08号 / 終焉の開闢",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd17-006",
         "name": "百万超邪 クロスファイア",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd17-007",
         "name": "電脳の女王 アリス / 不埒な再侵入",
-        "count": 1
+        "count": 4
       },
       {
-        "id": "dmbd17-008",
-        "name": "裏斬の取引 パルサー",
-        "count": 1
-      },
-      {
-        "id": "dmbd17-009",
-        "name": "冥界の不死帝 ブルース /「迷いはない。俺の成すことは決まった」",
-        "count": 2
+        "id": "dmbd17-001",
+        "name": "戦武の無限皇 ジャッキー / 「俺たちの夢は終わらねぇ！」",
+        "count": 3
       },
       {
         "id": "dmbd17-010",
         "name": "灼熱の闘志 テスタ・ロッサ",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd17-011",
         "name": "疾封怒闘 キューブリック",
-        "count": 2
+        "count": 1
       },
       {
-        "id": "dmbd17-012",
-        "name": "終末の時計 ザ・クロック",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-013",
-        "name": "一なる部隊 イワシン",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-014",
-        "name": "盗掘人形モールス",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki001",
-        "name": "闇戦士ザビ・クロー",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki002",
-        "name": "死海竜",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki003",
-        "name": "偽りの王 ナンバーナイン",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki004",
-        "name": "転々のサトリ ラシャ",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki005",
-        "name": "タイム３ シド",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki006",
-        "name": "一極 マウチュ",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki007",
-        "name": "轟速 S",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki008",
-        "name": "改速 テンペンチーW",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki009",
-        "name": "轟速 ザ・レッド",
-        "count": 2
-      },
-      {
-        "id": "dmbd17-teki010",
-        "name": "黒神龍オドル・ニードル",
-        "count": 2
+        "id": "dmbd17-002",
+        "name": "熱血武闘 カツキング",
+        "count": 3
       }
     ]
   },
@@ -6789,62 +6504,37 @@
       "決闘ボルシャックデュエル"
     ],
     "totalCards": 40,
-    "uniqueCards": 24,
+    "uniqueCards": 14,
     "cards": [
       {
         "id": "dmbd16-001",
         "name": "ボルシャック・大和・ドラゴン / 大和ザンゲキ剣",
-        "count": 1
-      },
-      {
-        "id": "dmbd16-002",
-        "name": "ボルシャック・決闘・ドラゴン",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd16-003",
         "name": "ボルシャックライシス・NEX",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd16-004",
         "name": "ボルシャック・ドギラゴン",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd16-005",
         "name": "ボルシャック・クロス・NEX / ボルシャック英雄譚",
-        "count": 1
-      },
-      {
-        "id": "dmbd16-006",
-        "name": "ボルシャック・NEX / スーパー・スパーク",
-        "count": 1
-      },
-      {
-        "id": "dmbd16-007",
-        "name": "聖霊龍騎セイント・ボルシャック",
-        "count": 1
-      },
-      {
-        "id": "dmbd16-008",
-        "name": "ネオ・ボルシャック・ドラゴン / ボルシャックゾーン",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd16-009",
         "name": "ボルシャック・スーパーヒーロー / 超英雄タイム",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd16-010",
         "name": "ボルシャック・バトクロス",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-011",
-        "name": "ボルシャック・栄光・ルピア",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd16-012",
@@ -6854,62 +6544,37 @@
       {
         "id": "dmbd16-013",
         "name": "ボルシャック・ドラゴン / 決闘者・チャージャー",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd16-014",
         "name": "ボルシャック・ルピア",
+        "count": 4
+      },
+      {
+        "id": "dmbd16-006",
+        "name": "ボルシャック・NEX / スーパー・スパーク",
         "count": 2
       },
       {
-        "id": "dmbd16-teki001",
-        "name": "神滅竜騎ガルザーク",
-        "count": 2
+        "id": "dmbd16-007",
+        "name": "聖霊龍騎セイント・ボルシャック",
+        "count": 1
       },
       {
-        "id": "dmbd16-teki002",
-        "name": "黒神龍ゼキラ",
-        "count": 2
+        "id": "dmbd16-002",
+        "name": "ボルシャック・決闘・ドラゴン",
+        "count": 3
       },
       {
-        "id": "dmbd16-teki003",
-        "name": "腐敗電脳メルニア",
-        "count": 2
+        "id": "dmbd16-008",
+        "name": "ネオ・ボルシャック・ドラゴン / ボルシャックゾーン",
+        "count": 4
       },
       {
-        "id": "dmbd16-teki004",
-        "name": "翔天魔獣ギガッピ",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki005",
-        "name": "黒神龍ギランド",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki006",
-        "name": "黒神龍ザルバ",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki007",
-        "name": "呪いの影シャドウ・ムーン",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki008",
-        "name": "飛行男",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki009",
-        "name": "解体屋ピーカプ",
-        "count": 2
-      },
-      {
-        "id": "dmbd16-teki010",
-        "name": "凶戦士ブレイズ・クロー",
-        "count": 2
+        "id": "dmbd16-011",
+        "name": "ボルシャック・栄光・ルピア",
+        "count": 4
       }
     ]
   },
@@ -6925,12 +6590,12 @@
       "そうりゅうかくめい"
     ],
     "totalCards": 40,
-    "uniqueCards": 38,
+    "uniqueCards": 18,
     "cards": [
       {
         "id": "dmbd15-001",
         "name": "蒼き守護神 ドギラゴン閃",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd15-002",
@@ -6940,12 +6605,12 @@
       {
         "id": "dmbd15-003",
         "name": "蒼き団長 ドギラゴン剣",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd15-004",
         "name": "鳳翔竜騎ソウルピアレイジ / 高貴なる魂炎",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd15-005",
@@ -6960,37 +6625,37 @@
       {
         "id": "dmbd15-007",
         "name": "ボルシャック・サイバーエクス",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd15-008",
         "name": "エヴォ・ルピア",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd15-009",
         "name": "単騎連射 マグナム",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd15-010",
         "name": "凰翔竜機バルキリー・ルピア",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd15-011",
         "name": "プラチナ・ワルスラS",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd15-012",
         "name": "終末の時計 ザ・クロック",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd15-013",
         "name": "“龍装”チュリス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd15-014",
@@ -7005,117 +6670,17 @@
       {
         "id": "dmbd15-016",
         "name": "異端流し オニカマス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd15-017",
         "name": "龍装者 バルチュリス",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd15-018",
         "name": "光牙忍ハヤブサマル",
         "count": 1
-      },
-      {
-        "id": "dmbd15-be1",
-        "name": "蒼き守護神 ドギラゴン閃",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be10",
-        "name": "閃光の守護者ホーリー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be2",
-        "name": "ボルシャック・ドギラゴン",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be3",
-        "name": "鳳翔竜騎ソウルピアレイジ / 高貴なる魂炎",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be4",
-        "name": "聖霊龍騎サンブレード・NEX",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be5",
-        "name": "ボルシャック・サイバーエクス",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be6",
-        "name": "ボルシャック・ドラゴン / 決闘者・チャージャー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be7",
-        "name": "その子供、可憐につき",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be8",
-        "name": "無双の縛り 達閃 / パシフィック・スパーク",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-be9",
-        "name": "奇石 ミクセル / ジャミング・チャフ",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se1",
-        "name": "時の法皇 ミラダンテⅫ",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se10",
-        "name": "閃光の守護者ホーリー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se2",
-        "name": "ボルシャック・ドラゴン / 決闘者・チャージャー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se3",
-        "name": "マグナム・ルピア / クリムゾン・チャージャー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se4",
-        "name": "その子供、可憐につき",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se5",
-        "name": "無双の縛り 達閃 / パシフィック・スパーク",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se6",
-        "name": "ボルシャック・NEX",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se7",
-        "name": "水晶の記録 ゼノシャーク / クリスタル・メモリー",
-        "count": 1
-      },
-      {
-        "id": "dmbd15-se8",
-        "name": "奇天烈 シャッフ",
-        "count": 2
-      },
-      {
-        "id": "dmbd15-se9",
-        "name": "奇石 ミクセル / ジャミング・チャフ",
-        "count": 2
       }
     ]
   },
@@ -7130,8 +6695,8 @@
       "龍魂紅蓮譚",
       "りゅうこんぐれんたん"
     ],
-    "totalCards": 40,
-    "uniqueCards": 25,
+    "totalCards": 44,
+    "uniqueCards": 16,
     "cards": [
       {
         "id": "dmbd14-001",
@@ -7156,37 +6721,37 @@
       {
         "id": "dmbd14-005",
         "name": "爆銀王剣 バトガイ刃斗",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd14-006",
         "name": "覇闘将龍剣 ガイオウバーン",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd14-007",
         "name": "最終龍覇 グレンモルト",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd14-008",
         "name": "龍装の調べ 初不 / ホーリー・スパーク",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd14-009",
         "name": "“乱振”舞神 G・W・D",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd14-010",
         "name": "轟牙忍 ハヤブサリュウ",
-        "count": 1
+        "count": 2
       },
       {
         "id": "dmbd14-011",
         "name": "二刀龍覇 グレンモルト 「王」",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd14-012",
@@ -7196,67 +6761,22 @@
       {
         "id": "dmbd14-013",
         "name": "龍覇 ラブエース",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd14-014",
         "name": "最終龍覇 ボロフ",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd14-015",
         "name": "爆龍覇 リンクウッド /「お前の相手はオレだ、ザ=デッドマン！」",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd14-016",
         "name": "爆龍覇 ヒビキ",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-017",
-        "name": "龍覇 グレンアイラ",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-018",
-        "name": "白鬼ギャラガ",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-019",
-        "name": "真・龍覇 ヘブンズロージア",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-020",
-        "name": "撃髄医 スパイナー",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-021",
-        "name": "デーモン・ハンド",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-022",
-        "name": "デーモン・ハンド",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-023",
-        "name": "デーモン・ハンド",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-024",
-        "name": "デーモン・ハンド",
-        "count": 2
-      },
-      {
-        "id": "dmbd14-025",
-        "name": "リロード・チャージャー",
-        "count": 2
+        "count": 3
       }
     ]
   },
@@ -7272,7 +6792,7 @@
       "かくせいりゅうせいたん"
     ],
     "totalCards": 40,
-    "uniqueCards": 26,
+    "uniqueCards": 14,
     "cards": [
       {
         "id": "dmbd13-001",
@@ -7297,111 +6817,51 @@
       {
         "id": "dmbd13-005",
         "name": "超時空ストームG・XX",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-006",
         "name": "時空の支配者ディアボロス Z",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-007",
         "name": "姫様宣言プリンプリン",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd13-008",
         "name": "覚星龍界 剣聖ジゲン",
-        "count": 1
+        "count": 3
       },
       {
         "id": "dmbd13-009",
         "name": "ハリケーン・クロウラー / ブレイン・チャージャー",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-010",
         "name": "龍素記号Sr スペルサイクリカ",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-011",
         "name": "ドンドン水撒くナウ",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-012",
         "name": "全員集合！アクア・三兄弟 / 超次元ジェイシーエイ・ホール",
-        "count": 1
+        "count": 4
       },
       {
         "id": "dmbd13-013",
         "name": "最終決戦だ！鬼丸ボーイ / 超次元オニシュラ・ホール",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd13-014",
         "name": "The 大親分 鬼流院 刃 / 「アンノウンがナンボのモンじゃ！」",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-015",
-        "name": "超次元リュウセイ・ホール",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-016",
-        "name": "ドンドン吸い込むナウ",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-017",
-        "name": "Dの博才 サイバーダイス・ベガス",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-018",
-        "name": "フェアリー・シャワー",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-019",
-        "name": "超次元ガロウズ・ホール",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-020",
-        "name": "電脳鎧冑アナリス",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-021",
-        "name": "爆砕面 ジョニーウォーカー",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-022",
-        "name": "超次元フェアリー・ホール",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-023",
-        "name": "フェアリー・ライフ",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-024",
-        "name": "フェアリー・ライフ",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-025",
-        "name": "フェアリー・ライフ",
-        "count": 2
-      },
-      {
-        "id": "dmbd13-026",
-        "name": "フェアリー・ライフ",
         "count": 2
       }
     ]
@@ -7928,12 +7388,12 @@
       "デッドディザスター"
     ],
     "totalCards": 40,
-    "uniqueCards": 18,
+    "uniqueCards": 14,
     "cards": [
       {
         "id": "dmbd10-001",
         "name": "S級不死 デッドゾーン",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-002",
@@ -7943,17 +7403,17 @@
       {
         "id": "dmbd10-003",
         "name": "凶鬼09号 ギャリベータ",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-004",
         "name": "プラチナ・ワルスラS",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-005",
         "name": "奇天烈 シャッフ",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-006",
@@ -7963,7 +7423,7 @@
       {
         "id": "dmbd10-007",
         "name": "不死 デッド55",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-008",
@@ -7973,12 +7433,12 @@
       {
         "id": "dmbd10-009",
         "name": "悪魔妖精ベラドンナ",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd10-010",
         "name": "天災 デドダム",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-011",
@@ -7988,37 +7448,17 @@
       {
         "id": "dmbd10-012",
         "name": "暗黒の悪魔神ヴァーズ・ロマノフ",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-013",
         "name": "撃髄医 スパイナー",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd10-014",
         "name": "テック団の波壊Go！",
-        "count": 2
-      },
-      {
-        "id": "dmbd10-015",
-        "name": "不死 ゾンビーバー",
-        "count": 3
-      },
-      {
-        "id": "dmbd10-016",
-        "name": "終断γ ドルブロ",
-        "count": 3
-      },
-      {
-        "id": "dmbd10-017",
-        "name": "【問２】ノロン⤴",
-        "count": 3
-      },
-      {
-        "id": "dmbd10-018",
-        "name": "戦略のＤ・Ｈ アツト",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -8042,29 +7482,64 @@
         "count": 2
       },
       {
-        "id": "dmbd09-002",
-        "name": "勝利宣言 鬼丸「覇」",
+        "id": "dmbd09-009",
+        "name": "聖闘の精霊龍 セイント・カイザー / ライブラ・シールド",
         "count": 2
       },
       {
-        "id": "dmbd09-003",
-        "name": "ザオヴァナイン・カイザー",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-004",
-        "name": "リュウセイ・天下五剣カイザー",
+        "id": "dmbd09-015",
+        "name": "光牙王機ゼロカゲ",
         "count": 2
       },
       {
         "id": "dmbd09-005",
         "name": "龍素記号Sr スペルサイクリカ",
+        "count": 1
+      },
+      {
+        "id": "dmbd09-016",
+        "name": "ドンドン吸い込むナウ",
+        "count": 3
+      },
+      {
+        "id": "dmbd09-018",
+        "name": "パクリオ",
         "count": 2
+      },
+      {
+        "id": "dmbd09-002",
+        "name": "勝利宣言 鬼丸「覇」",
+        "count": 1
       },
       {
         "id": "dmbd09-006",
         "name": "永遠のリュウセイ・カイザー",
-        "count": 2
+        "count": 1
+      },
+      {
+        "id": "dmbd09-010",
+        "name": "闘争類拳嘩目 ステゴロ・カイザー / お清めシャラップ",
+        "count": 3
+      },
+      {
+        "id": "dmbd09-011",
+        "name": "ナチュラトゥルー・トラップ",
+        "count": 4
+      },
+      {
+        "id": "dmbd09-019",
+        "name": "ライフプラン・チャージャー",
+        "count": 3
+      },
+      {
+        "id": "dmbd09-020",
+        "name": "フェアリー・ライフ",
+        "count": 4
+      },
+      {
+        "id": "dmbd09-003",
+        "name": "ザオヴァナイン・カイザー",
+        "count": 1
       },
       {
         "id": "dmbd09-007",
@@ -8072,29 +7547,24 @@
         "count": 2
       },
       {
-        "id": "dmbd09-008",
-        "name": "悠久を統べる者 フォーエバー・プリンセス",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-009",
-        "name": "聖闘の精霊龍 セイント・カイザー / ライブラ・シールド",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-010",
-        "name": "闘争類拳嘩目 ステゴロ・カイザー / お清めシャラップ",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-011",
-        "name": "ナチュラトゥルー・トラップ",
-        "count": 2
-      },
-      {
         "id": "dmbd09-012",
         "name": "無双龍聖イージスブースト",
         "count": 2
+      },
+      {
+        "id": "dmbd09-017",
+        "name": "フェアリー・シャワー",
+        "count": 2
+      },
+      {
+        "id": "dmbd09-004",
+        "name": "リュウセイ・天下五剣カイザー",
+        "count": 1
+      },
+      {
+        "id": "dmbd09-008",
+        "name": "悠久を統べる者 フォーエバー・プリンセス",
+        "count": 1
       },
       {
         "id": "dmbd09-013",
@@ -8104,37 +7574,7 @@
       {
         "id": "dmbd09-014",
         "name": "怒流牙 サイゾウミスト",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-015",
-        "name": "光牙王機ゼロカゲ",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-016",
-        "name": "ドンドン吸い込むナウ",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-017",
-        "name": "フェアリー・シャワー",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-018",
-        "name": "パクリオ",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-019",
-        "name": "ライフプラン・チャージャー",
-        "count": 2
-      },
-      {
-        "id": "dmbd09-020",
-        "name": "フェアリー・ライフ",
-        "count": 2
+        "count": 1
       }
     ]
   },
@@ -8153,29 +7593,34 @@
     "uniqueCards": 19,
     "cards": [
       {
-        "id": "dmbd06-001",
-        "name": "「終焉」の頂 オーエン・ザ・ロード",
-        "count": 2
-      },
-      {
-        "id": "dmbd06-002",
-        "name": "「創世」の頂 セーブ・ザ・デイト",
-        "count": 2
+        "id": "dmbd06-010",
+        "name": "「逆相」の頂 オガヤード・スンラート",
+        "count": 3
       },
       {
         "id": "dmbd06-003",
         "name": "「俺」の頂 ライオネル",
-        "count": 2
+        "count": 1
       },
       {
-        "id": "dmbd06-004",
-        "name": "「破滅」の頂 ユートピア・エヴァー",
-        "count": 2
+        "id": "dmbd06-008",
+        "name": "「智」の頂 レディオ・ローゼス",
+        "count": 1
       },
       {
         "id": "dmbd06-005",
         "name": "「呪」の頂 サスペンス",
-        "count": 2
+        "count": 1
+      },
+      {
+        "id": "dmbd06-007",
+        "name": "「祝」の頂 ウェディング",
+        "count": 1
+      },
+      {
+        "id": "dmbd06-004",
+        "name": "「破滅」の頂 ユートピア・エヴァー",
+        "count": 1
       },
       {
         "id": "dmbd06-006",
@@ -8183,44 +7628,44 @@
         "count": 2
       },
       {
-        "id": "dmbd06-007",
-        "name": "「祝」の頂 ウェディング",
-        "count": 2
-      },
-      {
-        "id": "dmbd06-008",
-        "name": "「智」の頂 レディオ・ローゼス",
-        "count": 2
-      },
-      {
         "id": "dmbd06-009",
         "name": "「獅子」の頂 ライオネル・フィナーレ",
-        "count": 2
+        "count": 1
       },
       {
-        "id": "dmbd06-010",
-        "name": "「逆相」の頂 オガヤード・スンラート",
-        "count": 2
-      },
-      {
-        "id": "dmbd06-011",
-        "name": "天頂秘伝ゼニス・レクイエム",
-        "count": 2
+        "id": "dmbd06-017",
+        "name": "天運ゼニスクラッチ",
+        "count": 3
       },
       {
         "id": "dmbd06-012",
         "name": "極頂秘伝ゼニス・シンフォニー",
-        "count": 2
+        "count": 3
+      },
+      {
+        "id": "dmbd06-011",
+        "name": "天頂秘伝ゼニス・レクイエム",
+        "count": 1
+      },
+      {
+        "id": "dmbd06-001",
+        "name": "「終焉」の頂 オーエン・ザ・ロード",
+        "count": 1
+      },
+      {
+        "id": "dmbd06-002",
+        "name": "「創世」の頂 セーブ・ザ・デイト",
+        "count": 1
       },
       {
         "id": "dmbd06-013",
         "name": "真実の名 バウライオン",
-        "count": 2
+        "count": 3
       },
       {
         "id": "dmbd06-014",
         "name": "懐疑の虎狼 ミラーズホロウ / 「汝は偽名なりや？」",
-        "count": 2
+        "count": 4
       },
       {
         "id": "dmbd06-015",
@@ -8228,24 +7673,19 @@
         "count": 2
       },
       {
-        "id": "dmbd06-016",
-        "name": "トライガード・チャージャー",
-        "count": 2
-      },
-      {
-        "id": "dmbd06-017",
-        "name": "天運ゼニスクラッチ",
-        "count": 2
-      },
-      {
         "id": "dmbd06-018",
         "name": "ヘブンズ・ゲート",
-        "count": 3
+        "count": 4
       },
       {
         "id": "dmbd06-019",
         "name": "グローリー・スノー",
         "count": 3
+      },
+      {
+        "id": "dmbd06-016",
+        "name": "トライガード・チャージャー",
+        "count": 4
       }
     ]
   },
@@ -8264,79 +7704,9 @@
     "uniqueCards": 18,
     "cards": [
       {
-        "id": "dmbd05-001",
-        "name": "無双龍幻バルガ・ド・ライバー",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-002",
-        "name": "勝利宣言 鬼丸「覇」",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-003",
-        "name": "永遠のリュウセイ・カイザー",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-004",
-        "name": "界王類絶対目 ワルド・ブラッキオ",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-005",
-        "name": "剛撃古龍テラネスク",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-006",
-        "name": "閃光のメテオライト・リュウセイ",
-        "count": 2
-      },
-      {
         "id": "dmbd05-007",
         "name": "光神龍スペル・デル・フィン",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-008",
-        "name": "地掘類蛇蝎目 ディグルピオン",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-009",
-        "name": "熱血龍 バトクロス・バトル",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-010",
-        "name": "竜星バルガライザー",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-011",
-        "name": "摩破目 ナトゥーラ・トプス / ストンピング・ウィード",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-012",
-        "name": "無双龍聖イージスブースト",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-013",
-        "name": "龍幻のトラップ・スパーク",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-014",
-        "name": "メンデルスゾーン",
-        "count": 2
-      },
-      {
-        "id": "dmbd05-015",
-        "name": "トップ・オブ・ロマネスク",
-        "count": 3
+        "count": 1
       },
       {
         "id": "dmbd05-016",
@@ -8344,14 +7714,84 @@
         "count": 3
       },
       {
+        "id": "dmbd05-002",
+        "name": "勝利宣言 鬼丸「覇」",
+        "count": 1
+      },
+      {
+        "id": "dmbd05-003",
+        "name": "永遠のリュウセイ・カイザー",
+        "count": 1
+      },
+      {
+        "id": "dmbd05-010",
+        "name": "竜星バルガライザー",
+        "count": 4
+      },
+      {
+        "id": "dmbd05-009",
+        "name": "熱血龍 バトクロス・バトル",
+        "count": 3
+      },
+      {
         "id": "dmbd05-017",
         "name": "メガ・ブレード・ドラゴン",
+        "count": 2
+      },
+      {
+        "id": "dmbd05-004",
+        "name": "界王類絶対目 ワルド・ブラッキオ",
+        "count": 1
+      },
+      {
+        "id": "dmbd05-011",
+        "name": "摩破目 ナトゥーラ・トプス / ストンピング・ウィード",
+        "count": 4
+      },
+      {
+        "id": "dmbd05-005",
+        "name": "剛撃古龍テラネスク",
+        "count": 1
+      },
+      {
+        "id": "dmbd05-008",
+        "name": "地掘類蛇蝎目 ディグルピオン",
+        "count": 2
+      },
+      {
+        "id": "dmbd05-006",
+        "name": "閃光のメテオライト・リュウセイ",
+        "count": 1
+      },
+      {
+        "id": "dmbd05-012",
+        "name": "無双龍聖イージスブースト",
         "count": 3
+      },
+      {
+        "id": "dmbd05-013",
+        "name": "龍幻のトラップ・スパーク",
+        "count": 2
+      },
+      {
+        "id": "dmbd05-001",
+        "name": "無双龍幻バルガ・ド・ライバー",
+        "count": 2
       },
       {
         "id": "dmbd05-018",
         "name": "蒼龍の大地",
-        "count": 3
+        "count": 1
+      },
+      {
+        "id": "dmbd05-014",
+        "name": "メンデルスゾーン",
+        "count": 4
+      },
+      {
+        "id": "dmbd05-015",
+        "name": "トップ・オブ・ロマネスク",
+        "count": 4
       }
     ]
   },
@@ -8560,43 +8000,28 @@
     "uniqueCards": 15,
     "cards": [
       {
-        "id": "dmsd21-001",
-        "name": "終来王鬼 ジャオウガ",
-        "count": 2
-      },
-      {
         "id": "dmsd21-002",
         "name": "マガン金剛 ＜Nワル.鬼＞",
         "count": 2
       },
       {
-        "id": "dmsd21-003",
-        "name": "シャクネツ悪鬼の巻",
-        "count": 2
-      },
-      {
-        "id": "dmsd21-004",
-        "name": "ヨウガン竜鬼の封",
-        "count": 2
-      },
-      {
-        "id": "dmsd21-005",
-        "name": "バクエン変怪 ＜シグマ.鬼＞",
-        "count": 2
-      },
-      {
-        "id": "dmsd21-006",
-        "name": "闇鎧亜ジャック・アルカディアス",
-        "count": 3
-      },
-      {
         "id": "dmsd21-007",
         "name": "阿修羅ムカデ ＜デスシラズ.Star＞",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmsd21-008",
         "name": "ヴィオラの黒像",
+        "count": 2
+      },
+      {
+        "id": "dmsd21-003",
+        "name": "シャクネツ悪鬼の巻",
+        "count": 4
+      },
+      {
+        "id": "dmsd21-011",
+        "name": "ジェニーの黒像",
         "count": 3
       },
       {
@@ -8605,34 +8030,49 @@
         "count": 3
       },
       {
-        "id": "dmsd21-010",
-        "name": "勇愛の天秤",
-        "count": 3
+        "id": "dmsd21-001",
+        "name": "終来王鬼 ジャオウガ",
+        "count": 1
       },
       {
-        "id": "dmsd21-011",
-        "name": "ジェニーの黒像",
-        "count": 3
-      },
-      {
-        "id": "dmsd21-012",
-        "name": "カチコミ入道 ＜バトライ.鬼＞",
+        "id": "dmsd21-005",
+        "name": "バクエン変怪 ＜シグマ.鬼＞",
         "count": 3
       },
       {
         "id": "dmsd21-013",
         "name": "オンソク童子 ＜ターボ.鬼＞",
-        "count": 3
+        "count": 2
+      },
+      {
+        "id": "dmsd21-012",
+        "name": "カチコミ入道 ＜バトライ.鬼＞",
+        "count": 4
       },
       {
         "id": "dmsd21-014",
         "name": "ストリエ雷鬼の巻",
-        "count": 3
+        "count": 4
+      },
+      {
+        "id": "dmsd21-004",
+        "name": "ヨウガン竜鬼の封",
+        "count": 2
+      },
+      {
+        "id": "dmsd21-010",
+        "name": "勇愛の天秤",
+        "count": 2
+      },
+      {
+        "id": "dmsd21-006",
+        "name": "闇鎧亜ジャック・アルカディアス",
+        "count": 4
       },
       {
         "id": "dmsd21-015",
         "name": "アヤツリ入道",
-        "count": 3
+        "count": 2
       }
     ]
   },
@@ -8927,6 +8367,56 @@
       {
         "id": "dmsd17-001",
         "name": "ボルシャック・大和・モモキング",
+        "count": 1
+      },
+      {
+        "id": "dmsd17-006",
+        "name": "コッコ・ルピア GS",
+        "count": 4
+      },
+      {
+        "id": "dmsd17-011",
+        "name": "モエル・モヒッチ",
+        "count": 4
+      },
+      {
+        "id": "dmsd17-007",
+        "name": "ブッパ・ハート",
+        "count": 4
+      },
+      {
+        "id": "dmsd17-005",
+        "name": "ツタンカーネン ＜カゲキリ.Star＞",
+        "count": 2
+      },
+      {
+        "id": "dmsd17-004",
+        "name": "ドツキ万次郎 ＜GENJI.Star＞",
+        "count": 2
+      },
+      {
+        "id": "dmsd17-003",
+        "name": "ボルシャック・モモキング",
+        "count": 2
+      },
+      {
+        "id": "dmsd17-012",
+        "name": "チョートッQ ＜グレガリ.Star＞",
+        "count": 4
+      },
+      {
+        "id": "dmsd17-013",
+        "name": "パーリギリス",
+        "count": 4
+      },
+      {
+        "id": "dmsd17-009",
+        "name": "進化設計図",
+        "count": 3
+      },
+      {
+        "id": "dmsd17-014",
+        "name": "フェアリー・Re:ライフ",
         "count": 2
       },
       {
@@ -8935,63 +8425,13 @@
         "count": 2
       },
       {
-        "id": "dmsd17-003",
-        "name": "ボルシャック・モモキング",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-004",
-        "name": "ドツキ万次郎 ＜GENJI.Star＞",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-005",
-        "name": "ツタンカーネン ＜カゲキリ.Star＞",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-006",
-        "name": "コッコ・ルピア GS",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-007",
-        "name": "ブッパ・ハート",
-        "count": 3
-      },
-      {
         "id": "dmsd17-008",
         "name": "ヘットルとフエートル",
         "count": 3
       },
       {
-        "id": "dmsd17-009",
-        "name": "進化設計図",
-        "count": 3
-      },
-      {
         "id": "dmsd17-010",
         "name": "モモダチトレーニング!!!",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-011",
-        "name": "モエル・モヒッチ",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-012",
-        "name": "チョートッQ ＜グレガリ.Star＞",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-013",
-        "name": "パーリギリス",
-        "count": 3
-      },
-      {
-        "id": "dmsd17-014",
-        "name": "フェアリー・Re:ライフ",
         "count": 3
       }
     ]
@@ -9010,38 +8450,8 @@
     "uniqueCards": 14,
     "cards": [
       {
-        "id": "dmsd16-001",
-        "name": "幻龍 ゲンムエンペラー",
-        "count": 2
-      },
-      {
         "id": "dmsd16-002",
         "name": "罪無 ミズゲム垓",
-        "count": 2
-      },
-      {
-        "id": "dmsd16-003",
-        "name": "罪無 スピンナ極",
-        "count": 3
-      },
-      {
-        "id": "dmsd16-004",
-        "name": "罪無 バドミン垓",
-        "count": 3
-      },
-      {
-        "id": "dmsd16-005",
-        "name": "罪無 ビコハン極",
-        "count": 3
-      },
-      {
-        "id": "dmsd16-006",
-        "name": "戯具 ヴァイモデル",
-        "count": 3
-      },
-      {
-        "id": "dmsd16-007",
-        "name": "凶鬼23号 グザリ",
         "count": 3
       },
       {
@@ -9052,12 +8462,37 @@
       {
         "id": "dmsd16-009",
         "name": "終末の時計 ザ・クロック",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmsd16-010",
         "name": "ドンドン吹雪くナウ",
+        "count": 2
+      },
+      {
+        "id": "dmsd16-012",
+        "name": "戯具 ザンボロン",
+        "count": 4
+      },
+      {
+        "id": "dmsd16-003",
+        "name": "罪無 スピンナ極",
+        "count": 2
+      },
+      {
+        "id": "dmsd16-004",
+        "name": "罪無 バドミン垓",
         "count": 3
+      },
+      {
+        "id": "dmsd16-006",
+        "name": "戯具 ヴァイモデル",
+        "count": 3
+      },
+      {
+        "id": "dmsd16-007",
+        "name": "凶鬼23号 グザリ",
+        "count": 4
       },
       {
         "id": "dmsd16-011",
@@ -9065,19 +8500,24 @@
         "count": 3
       },
       {
-        "id": "dmsd16-012",
-        "name": "戯具 ザンボロン",
-        "count": 3
-      },
-      {
         "id": "dmsd16-013",
         "name": "ねじれる者ボーン・スライム",
-        "count": 3
+        "count": 4
+      },
+      {
+        "id": "dmsd16-001",
+        "name": "幻龍 ゲンムエンペラー",
+        "count": 1
+      },
+      {
+        "id": "dmsd16-005",
+        "name": "罪無 ビコハン極",
+        "count": 2
       },
       {
         "id": "dmsd16-014",
         "name": "戯具 ドゥゲンダ",
-        "count": 3
+        "count": 4
       }
     ]
   },
@@ -9095,19 +8535,9 @@
     "uniqueCards": 14,
     "cards": [
       {
-        "id": "dmsd15-001",
-        "name": "鬼ヶ鬼 ジャオウガ",
-        "count": 2
-      },
-      {
         "id": "dmsd15-002",
         "name": "「辻斬」の鬼 サコン丸",
         "count": 2
-      },
-      {
-        "id": "dmsd15-003",
-        "name": "「双打」の鬼 ウコン丸",
-        "count": 3
       },
       {
         "id": "dmsd15-004",
@@ -9117,12 +8547,42 @@
       {
         "id": "dmsd15-005",
         "name": "ガワラ入道",
-        "count": 3
+        "count": 4
+      },
+      {
+        "id": "dmsd15-009",
+        "name": "凶殺皇 デス・ハンズ",
+        "count": 4
+      },
+      {
+        "id": "dmsd15-011",
+        "name": "闇戦士ザビ・クロー",
+        "count": 4
+      },
+      {
+        "id": "dmsd15-003",
+        "name": "「双打」の鬼 ウコン丸",
+        "count": 2
       },
       {
         "id": "dmsd15-006",
         "name": "キズグイ変怪",
-        "count": 3
+        "count": 4
+      },
+      {
+        "id": "dmsd15-012",
+        "name": "トツゲキ戦車 バクゲットー",
+        "count": 2
+      },
+      {
+        "id": "dmsd15-013",
+        "name": "ソッコウ童子",
+        "count": 4
+      },
+      {
+        "id": "dmsd15-001",
+        "name": "鬼ヶ鬼 ジャオウガ",
+        "count": 1
       },
       {
         "id": "dmsd15-007",
@@ -9135,34 +8595,14 @@
         "count": 3
       },
       {
-        "id": "dmsd15-009",
-        "name": "凶殺皇 デス・ハンズ",
-        "count": 3
-      },
-      {
         "id": "dmsd15-010",
         "name": "襲来、鬼札王国！",
-        "count": 3
-      },
-      {
-        "id": "dmsd15-011",
-        "name": "闇戦士ザビ・クロー",
-        "count": 3
-      },
-      {
-        "id": "dmsd15-012",
-        "name": "トツゲキ戦車 バクゲットー",
-        "count": 3
-      },
-      {
-        "id": "dmsd15-013",
-        "name": "ソッコウ童子",
-        "count": 3
+        "count": 2
       },
       {
         "id": "dmsd15-014",
         "name": "虹彩奪取 ブラッドギア",
-        "count": 3
+        "count": 2
       }
     ]
   },
@@ -9180,38 +8620,13 @@
     "uniqueCards": 15,
     "cards": [
       {
-        "id": "dmsd14-001",
-        "name": "勝熱龍 モモキング",
-        "count": 2
-      },
-      {
         "id": "dmsd14-002",
         "name": "ゴールド・キンタックス",
         "count": 2
       },
       {
-        "id": "dmsd14-003",
-        "name": "熊四駆 ベアシガラ",
-        "count": 2
-      },
-      {
         "id": "dmsd14-004",
         "name": "新導バット",
-        "count": 2
-      },
-      {
-        "id": "dmsd14-005",
-        "name": "飛べ！イカロソくん",
-        "count": 2
-      },
-      {
-        "id": "dmsd14-006",
-        "name": "ヘットルとフエートル",
-        "count": 3
-      },
-      {
-        "id": "dmsd14-007",
-        "name": "無頼勇騎タイガ",
         "count": 3
       },
       {
@@ -9222,16 +8637,26 @@
       {
         "id": "dmsd14-009",
         "name": "モモダチパワー!!!",
-        "count": 3
+        "count": 2
       },
       {
-        "id": "dmsd14-010",
-        "name": "罠の超人",
-        "count": 3
+        "id": "dmsd14-013",
+        "name": "凶戦士ブレイズ・クロー",
+        "count": 4
+      },
+      {
+        "id": "dmsd14-003",
+        "name": "熊四駆 ベアシガラ",
+        "count": 2
       },
       {
         "id": "dmsd14-011",
         "name": "ホスピヨゲール",
+        "count": 2
+      },
+      {
+        "id": "dmsd14-010",
+        "name": "罠の超人",
         "count": 3
       },
       {
@@ -9240,19 +8665,34 @@
         "count": 3
       },
       {
-        "id": "dmsd14-013",
-        "name": "凶戦士ブレイズ・クロー",
+        "id": "dmsd14-014",
+        "name": "メイプル超もみ人",
+        "count": 4
+      },
+      {
+        "id": "dmsd14-001",
+        "name": "勝熱龍 モモキング",
+        "count": 1
+      },
+      {
+        "id": "dmsd14-006",
+        "name": "ヘットルとフエートル",
         "count": 3
       },
       {
-        "id": "dmsd14-014",
-        "name": "メイプル超もみ人",
+        "id": "dmsd14-005",
+        "name": "飛べ！イカロソくん",
         "count": 3
       },
       {
         "id": "dmsd14-015",
         "name": "ノー千休",
         "count": 3
+      },
+      {
+        "id": "dmsd14-007",
+        "name": "無頼勇騎タイガ",
+        "count": 2
       }
     ]
   },
