@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#090d16"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="cardBack" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="50%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#9333ea"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="8" width="240" height="240" rx="52" fill="url(#bg)" stroke="url(#gold)" stroke-width="6"/>
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#334155" stroke-width="2" stroke-dasharray="6 4"/>
+  <g transform="rotate(-12 128 132)">
+    <rect x="82" y="64" width="88" height="124" rx="10" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+  </g>
+  <g transform="rotate(4 128 132)">
+    <rect x="84" y="62" width="88" height="124" rx="10" fill="url(#cardBack)" stroke="url(#gold)" stroke-width="5"/>
+    <rect x="94" y="72" width="68" height="48" rx="5" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+    <text x="128" y="104" text-anchor="middle" font-family="Arial Black, Impact, sans-serif" font-weight="900" font-size="26" fill="#fde047">DM</text>
+    <rect x="94" y="130" width="68" height="42" rx="4" fill="#0f172a" opacity="0.85"/>
+    <line x1="102" y1="142" x2="154" y2="142" stroke="#94a3b8" stroke-width="3" stroke-linecap="round"/>
+    <line x1="102" y1="152" x2="146" y2="152" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+    <line x1="102" y1="162" x2="138" y2="162" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <circle cx="128" cy="34" r="15" fill="#facc15" stroke="#fef08a" stroke-width="3"/>
+  <circle cx="216" cy="98" r="15" fill="#38bdf8" stroke="#bae6fd" stroke-width="3"/>
+  <circle cx="184" cy="204" r="15" fill="#a855f7" stroke="#e9d5ff" stroke-width="3"/>
+  <circle cx="72" cy="204" r="15" fill="#ef4444" stroke="#fecaca" stroke-width="3"/>
+  <circle cx="40" cy="98" r="15" fill="#22c55e" stroke="#bbf7d0" stroke-width="3"/>
+</svg>
+

@@ -1,13 +1,33 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Search, Plus, Check, Box, Loader2, X, ArrowUp, ArrowDown, Sparkles, Maximize2 } from 'lucide-react';
+import {
+  Search,
+  Plus,
+  Check,
+  Box,
+  Loader2,
+  X,
+  ArrowUp,
+  ArrowDown,
+  Sparkles,
+  Maximize2,
+  Layers,
+  SlidersHorizontal,
+  RotateCcw,
+} from 'lucide-react';
 import { getCivilizationColor } from '@/lib/civilization';
 import { normalizeForSearch } from '@/lib/normalize';
 import { getRarityRank, getRarityBadgeStyle } from '@/lib/rarity';
 import { StorageItem, CardMaster, CardFace } from '@/types';
-import { CARD_TYPE_CATEGORIES, matchesCardTypeFilter } from './InventoryView';
-import { api } from '@/lib/api';
+import {
+  CARD_TYPE_CATEGORIES,
+  matchesCardTypeFilter,
+  CIVIL_FILTER_OPTIONS,
+  COST_FILTER_OPTIONS,
+  ABILITY_QUICK_TAGS,
+} from './InventoryView';
+import { searchOfflineCards, localAddInventoryItem, searchDecksByQuery, localAddDeckToStorage, PreconstructedDeck } from '@/lib/clientStorage';
 
 /** 検索語が表面ではなく裏面（覚醒面など）の名前・フリガナに一致した場合、その面を返す */
 function findBackFaceHit(card: CardMaster, query: string): CardFace | null {
@@ -156,6 +176,14 @@ function BigCardResultTile({
               <span className="shrink-0 text-slate-500 ml-1">{currentFace.type}</span>
             )}
           </div>
+          {card.ability_text && (
+            <p
+              className="text-[10px] text-slate-300/90 line-clamp-3 leading-snug mt-1.5 bg-slate-900/70 rounded-lg px-2 py-1 border border-slate-700/60"
+              title={card.ability_text}
+            >
+              {card.ability_text}
+            </p>
+          )}
         </div>
       </div>
 
@@ -217,12 +245,51 @@ export default function CardRegisterBar({
 
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<CardMaster[]>([]);
+  const [matchedDecks, setMatchedDecks] = useState<PreconstructedDeck[]>([]);
+  const [isAddingDeck, setIsAddingDeck] = useState(false);
   const [selectedCard, setSelectedCard] = useState<CardMaster | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [dropdownSort, setDropdownSort] = useState<'relevance' | 'cost_asc' | 'cost_desc' | 'rarity_desc'>('relevance');
   const [dropdownTypeFilter, setDropdownTypeFilter] = useState<string>('all');
+
+  // デュエプレ風 詳細フィルター状態
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
+  const [filterCivils, setFilterCivils] = useState<string[]>([]);
+  const [filterCivilMode, setFilterCivilMode] = useState<'or' | 'and' | 'mono' | 'multi'>('or');
+  const [filterCosts, setFilterCosts] = useState<string[]>([]);
+  const [filterEffects, setFilterEffects] = useState<string[]>([]);
+  const [filterEffectText, setFilterEffectText] = useState<string>('');
+
+  const toggleFilterCivil = (val: string) => {
+    setFilterCivils((prev) => (prev.includes(val) ? prev.filter((c) => c !== val) : [...prev, val]));
+  };
+  const toggleFilterCost = (val: string) => {
+    setFilterCosts((prev) => (prev.includes(val) ? prev.filter((c) => c !== val) : [...prev, val]));
+  };
+  const toggleFilterEffect = (kw: string) => {
+    setFilterEffects((prev) => (prev.includes(kw) ? prev.filter((k) => k !== kw) : [...prev, kw]));
+  };
+
+  const activeFilterCount =
+    filterCivils.length +
+    (filterCivilMode !== 'or' ? 1 : 0) +
+    filterCosts.length +
+    (dropdownTypeFilter !== 'all' ? 1 : 0) +
+    filterEffects.length +
+    (filterEffectText.trim() ? 1 : 0);
+
+  const hasActiveFilters = activeFilterCount > 0;
+
+  const resetSearchFilters = () => {
+    setFilterCivils([]);
+    setFilterCivilMode('or');
+    setFilterCosts([]);
+    setDropdownTypeFilter('all');
+    setFilterEffects([]);
+    setFilterEffectText('');
+  };
 
   const displaySuggestions = useMemo(() => {
     const filtered = suggestions.filter((c) =>
@@ -250,6 +317,9 @@ export default function CardRegisterBar({
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [showBigResultsModal, setShowBigResultsModal] = useState<boolean>(false);
 
+  const showBigResultsModalRef = useRef(showBigResultsModal);
+  showBigResultsModalRef.current = showBigResultsModal;
+
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -275,20 +345,59 @@ export default function CardRegisterBar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // インクリメンタル検索 (Debounced)
+  // インクリメンタル検索 (Debounced) - フィルター条件のみでも検索可能
   useEffect(() => {
-    if (!query.trim()) {
+    const trimmedQ = query.trim();
+    const combinedEffect = [...filterEffects, filterEffectText.trim()].filter(Boolean).join(' ');
+
+    if (!trimmedQ && !hasActiveFilters) {
       setSuggestions([]);
+      setMatchedDecks([]);
       setShowDropdown(false);
       return;
     }
 
+    // デッキ検索（同期的・即時）
+    const decks = trimmedQ ? searchDecksByQuery(trimmedQ) : [];
+    setMatchedDecks(decks);
+
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
-        const data = await api.getCards({ q: query.trim(), limit: 130 });
-        setSuggestions(data.cards || []);
-        setShowDropdown(true);
+        let cardsResult: CardMaster[] | null = null;
+        try {
+          const sp = new URLSearchParams();
+          if (trimmedQ) sp.set('q', trimmedQ);
+          if (filterCivils.length > 0) sp.set('civil', filterCivils.join(','));
+          if (filterCivilMode !== 'or') sp.set('civilMode', filterCivilMode);
+          if (filterCosts.length > 0) sp.set('cost', filterCosts.join(','));
+          if (dropdownTypeFilter !== 'all') sp.set('type', dropdownTypeFilter);
+          if (combinedEffect) sp.set('effect', combinedEffect);
+          sp.set('limit', '400');
+
+          const res = await fetch(`/api/cards?${sp.toString()}`);
+          if (res.ok) {
+            const data = await res.json();
+            cardsResult = data.cards || [];
+          }
+        } catch {
+          cardsResult = null;
+        }
+
+        if (cardsResult === null) {
+          cardsResult = await searchOfflineCards(trimmedQ, 400, {
+            civils: filterCivils,
+            civilMode: filterCivilMode,
+            costs: filterCosts,
+            type: dropdownTypeFilter,
+            effect: combinedEffect,
+          });
+        }
+
+        setSuggestions(cardsResult);
+        if (!showBigResultsModalRef.current) {
+          setShowDropdown(true);
+        }
         setSelectedIndex(-1);
       } catch (e) {
         console.error(e);
@@ -298,7 +407,47 @@ export default function CardRegisterBar({
     }, 180);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, filterCivils, filterCivilMode, filterCosts, dropdownTypeFilter, filterEffects, filterEffectText, hasActiveFilters]);
+
+  // 構築済みデッキを一括追加
+  const handleAddDeck = async (deck: PreconstructedDeck) => {
+    if (!targetStorageId || isAddingDeck) return;
+    setIsAddingDeck(true);
+    const targetStorage = storages.find((s) => s.id === targetStorageId);
+    try {
+      let registeredOnServer = false;
+      try {
+        const payload = {
+          storage_id: targetStorageId,
+          items: deck.cards.map((c) => ({ card_id: c.id, count: c.count })),
+        };
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (res.ok) {
+          registeredOnServer = true;
+        }
+      } catch {
+        registeredOnServer = false;
+      }
+
+      if (!registeredOnServer) {
+        localAddDeckToStorage(targetStorageId, deck);
+      }
+
+      const storageName = targetStorage ? targetStorage.name : 'ストレージ';
+      setSuccessToast(`構築済みデッキ「${deck.name}」(${deck.totalCards}枚) を一括登録しました！`);
+      setTimeout(() => setSuccessToast(null), 3500);
+      onCardAdded();
+    } catch (e) {
+      console.error(e);
+      alert('デッキの登録に失敗しました');
+    } finally {
+      setIsAddingDeck(false);
+    }
+  };
 
   // サジェストから直接追加（検索結果は閉じずに維持）
   const handleDirectAdd = async (card: CardMaster, addCount: number = count) => {
@@ -306,28 +455,40 @@ export default function CardRegisterBar({
 
     setAddingCardId(card.id);
     try {
-      const res = await api.addInventory({
-        storage_id: targetStorageId,
-        card_id: card.id,
-        count: addCount,
-        condition,
-        memo,
-      });
-
-      if (res.success) {
-        const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
-        setSuccessToast(`「${card.name}」を ${addCount}枚 追加しました！ (${targetStorageName})`);
-        setTimeout(() => setSuccessToast(null), 3000);
-
-        // 追加済みバッジの更新
-        setRecentAddedMap((prev) => ({
-          ...prev,
-          [card.id]: (prev[card.id] || 0) + addCount,
-        }));
-
-        // インベントリ一覧の再取得（検索結果のドロップダウンは維持）
-        onCardAdded();
+      let addedToServer = false;
+      try {
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storage_id: targetStorageId,
+            card_id: card.id,
+            count: addCount,
+            condition,
+            memo,
+          }),
+        });
+        if (res.ok) addedToServer = true;
+      } catch {
+        addedToServer = false;
       }
+
+      if (!addedToServer) {
+        localAddInventoryItem(targetStorageId, card, addCount, condition, memo);
+      }
+
+      const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
+      setSuccessToast(`「${card.name}」を ${addCount}枚 追加しました！ (${targetStorageName})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+
+      // 追加済みバッジの更新
+      setRecentAddedMap((prev) => ({
+        ...prev,
+        [card.id]: (prev[card.id] || 0) + addCount,
+      }));
+
+      // インベントリ一覧の再取得（検索結果のドロップダウンは維持）
+      onCardAdded();
     } catch (e) {
       console.error(e);
     } finally {
@@ -356,7 +517,7 @@ export default function CardRegisterBar({
       // 矢印キーでサジェストの候補を選んでいる場合（selectedIndex >= 0）はそのカードを追加
       if (showDropdown && selectedIndex >= 0 && displaySuggestions[selectedIndex]) {
         handleDirectAdd(displaySuggestions[selectedIndex], count);
-      } else if (query.trim()) {
+      } else if (query.trim() || hasActiveFilters) {
         // それ以外（通常入力後にENTERを押した場合）は、検索結果を大きく表示！
         setShowBigResultsModal(true);
         setShowDropdown(false);
@@ -389,31 +550,212 @@ export default function CardRegisterBar({
 
     setIsSubmitting(true);
     try {
-      const res = await api.addInventory({
-        storage_id: targetStorageId,
-        card_id: selectedCard.id,
-        count,
-        condition,
-        memo,
-      });
-
-      if (res.success) {
-        const addedCardName = selectedCard.name;
-        const targetStorageName = storages.find((s) => s.id === targetStorageId)?.name || 'ストレージ';
-        
-        setSuccessToast(`「${addedCardName}」を ${count}枚 追加しました！ (${targetStorageName})`);
-        setTimeout(() => setSuccessToast(null), 3000);
-
-        // 次の入力に向けてリセット & フォーカス
-        clearSelection();
-        onCardAdded();
+      let addedToServer = false;
+      try {
+        const res = await fetch('/api/inventory', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            storage_id: targetStorageId,
+            card_id: selectedCard.id,
+            count,
+            condition,
+            memo,
+          }),
+        });
+        if (res.ok) addedToServer = true;
+      } catch {
+        addedToServer = false;
       }
+
+      if (!addedToServer) {
+        localAddInventoryItem(targetStorageId, selectedCard, count, condition, memo);
+      }
+
+      const addedCardName = selectedCard.name;
+      const targetStorageName = storages.find(s => s.id === targetStorageId)?.name || 'ストレージ';
+      
+      setSuccessToast(`「${addedCardName}」を ${count}枚 追加しました！ (${targetStorageName})`);
+      setTimeout(() => setSuccessToast(null), 3000);
+
+      // 次の入力に向けてリセット & フォーカス
+      clearSelection();
+      onCardAdded();
     } catch (e) {
       console.error(e);
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // デュエプレ風 絞り込みパネル共通UI（通常検索バー下 & 大画面モーダル内で共有）
+  const renderDuelpFilters = (inModal = false) => (
+    <div
+      className={
+        inModal
+          ? 'space-y-2 text-xs'
+          : 'mt-3 p-3.5 bg-slate-950/75 border border-slate-800 rounded-xl space-y-2.5 animate-fade-in'
+      }
+    >
+      {/* 文明（マナ）行 */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0">文明(マナ):</span>
+        <button
+          type="button"
+          onClick={() => {
+            setFilterCivils([]);
+            setFilterCivilMode('or');
+          }}
+          className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold border transition ${
+            filterCivils.length === 0 && filterCivilMode === 'or'
+              ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+              : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+          }`}
+        >
+          すべて
+        </button>
+        {CIVIL_FILTER_OPTIONS.map((cf) => {
+          const active = filterCivils.includes(cf.value);
+          return (
+            <button
+              key={cf.value}
+              type="button"
+              onClick={() => toggleFilterCivil(cf.value)}
+              className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold border transition ${
+                active ? cf.activeClass : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+              }`}
+            >
+              {cf.label}
+            </button>
+          );
+        })}
+        <span className="text-slate-700 mx-0.5">|</span>
+        {(
+          [
+            { label: 'いずれか(OR)', value: 'or' },
+            { label: 'すべて(AND)', value: 'and' },
+            { label: '単色', value: 'mono' },
+            { label: '多色', value: 'multi' },
+          ] as const
+        ).map((m) => (
+          <button
+            key={m.value}
+            type="button"
+            onClick={() => setFilterCivilMode(m.value)}
+            className={`px-2 py-0.5 rounded-lg text-[10px] font-semibold border transition ${
+              filterCivilMode === m.value
+                ? 'bg-indigo-600/35 border-indigo-400 text-indigo-200'
+                : 'bg-slate-800/50 border-slate-700/70 text-slate-400 hover:text-white'
+            }`}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      {/* コスト行 */}
+      <div className="flex flex-wrap items-center gap-1">
+        <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0">コスト:</span>
+        <button
+          type="button"
+          onClick={() => setFilterCosts([])}
+          className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold border transition ${
+            filterCosts.length === 0
+              ? 'bg-amber-600/30 border-amber-500 text-amber-200'
+              : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+          }`}
+        >
+          すべて
+        </button>
+        {COST_FILTER_OPTIONS.map((cv) => {
+          const active = filterCosts.includes(cv);
+          return (
+            <button
+              key={cv}
+              type="button"
+              onClick={() => toggleFilterCost(cv)}
+              className={`min-w-[28px] px-2 py-0.5 rounded-lg text-[11px] font-bold border transition ${
+                active
+                  ? 'bg-amber-600/35 border-amber-400 text-amber-100 shadow-sm'
+                  : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+              }`}
+            >
+              {cv}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 種類行（大画面モーダル外でも選択可） */}
+      {!inModal && (
+        <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+          <span className="text-[11px] font-bold text-slate-400 mr-1 shrink-0">種類:</span>
+          {CARD_TYPE_CATEGORIES.map((tf) => (
+            <button
+              key={tf.value}
+              type="button"
+              onClick={() => setDropdownTypeFilter(tf.value)}
+              className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold border whitespace-nowrap transition ${
+                dropdownTypeFilter === tf.value
+                  ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200'
+                  : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+              }`}
+            >
+              {tf.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* 効果・能力検索行 */}
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[220px]">
+            <span className="text-[11px] font-bold text-cyan-300 flex items-center gap-1 shrink-0">
+              <Sparkles className="w-3 h-3 text-cyan-400" />
+              効果・能力:
+            </span>
+            <input
+              type="text"
+              value={filterEffectText}
+              onChange={(e) => setFilterEffectText(e.target.value)}
+              placeholder="効果テキスト検索（例: 山札の上 墓地から コストを支払わずに）"
+              className="flex-1 min-w-[200px] max-w-md bg-slate-900 border border-slate-700 text-white rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-500"
+            />
+          </div>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetSearchFilters}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium border border-slate-700 transition shrink-0"
+            >
+              <RotateCcw className="w-3 h-3" />
+              条件をリセット ({activeFilterCount})
+            </button>
+          )}
+        </div>
+        <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+          {ABILITY_QUICK_TAGS.map((tag) => {
+            const active = filterEffects.includes(tag.keyword);
+            return (
+              <button
+                key={tag.label}
+                type="button"
+                onClick={() => toggleFilterEffect(tag.keyword)}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold border whitespace-nowrap transition ${
+                  active
+                    ? 'bg-cyan-600/35 border-cyan-400 text-cyan-100 shadow-sm'
+                    : 'bg-slate-800/70 border-slate-700 text-slate-400 hover:text-white'
+                }`}
+              >
+                {tag.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="relative bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-xl mb-6">
@@ -425,16 +767,36 @@ export default function CardRegisterBar({
           <h2 className="text-sm font-bold text-white tracking-wide">
             カードを検索してストレージに追加
           </h2>
-          <span className="text-xs text-slate-400">（候補をクリックで即座に追加・連続追加可能）</span>
+          <span className="hidden sm:inline text-xs text-slate-400">（候補をクリックで即座に追加・連続追加可能）</span>
         </div>
 
-        {/* トースト通知 */}
-        {successToast && (
-          <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-xs rounded-lg animate-fade-in">
-            <Check className="w-3.5 h-3.5" />
-            <span>{successToast}</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowFilterPanel((v) => !v)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition ${
+              showFilterPanel || hasActiveFilters
+                ? 'bg-cyan-600/25 border-cyan-500/70 text-cyan-200 shadow-sm'
+                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+            }`}
+          >
+            <SlidersHorizontal className="w-3.5 h-3.5" />
+            <span>マナ・コスト・効果で絞込</span>
+            {activeFilterCount > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-cyan-500 text-slate-950 text-[10px] font-extrabold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+
+          {/* トースト通知 */}
+          {successToast && (
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-950/80 border border-emerald-600/60 text-emerald-300 text-xs rounded-lg animate-fade-in">
+              <Check className="w-3.5 h-3.5" />
+              <span>{successToast}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
@@ -493,7 +855,7 @@ export default function CardRegisterBar({
             {isLoading && (
               <Loader2 className="w-4 h-4 text-blue-400 animate-spin absolute right-3 top-2.5" />
             )}
-            {!isLoading && query && (
+            {!isLoading && (query || hasActiveFilters) && (
               <div className="absolute right-2 top-1.5 flex items-center gap-1">
                 <button
                   type="button"
@@ -509,9 +871,12 @@ export default function CardRegisterBar({
                 </button>
                 <button
                   type="button"
-                  onClick={clearSelection}
+                  onClick={() => {
+                    clearSelection();
+                    resetSearchFilters();
+                  }}
                   className="p-1 text-slate-400 hover:text-white"
-                  title="クリア"
+                  title="検索と絞り込みをクリア"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -520,8 +885,50 @@ export default function CardRegisterBar({
           </div>
 
           {/* サジェストドロップダウン */}
-          {showDropdown && suggestions.length > 0 && (
+          {showDropdown && (suggestions.length > 0 || matchedDecks.length > 0 || hasActiveFilters) && (
             <div className="absolute left-0 right-0 top-full mt-1.5 max-h-96 overflow-y-auto bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 divide-y divide-slate-800">
+              {/* 構築済みデッキ一致バナー */}
+              {matchedDecks.length > 0 && (
+                <div className="bg-gradient-to-r from-amber-950/90 to-slate-900 p-2.5 border-b border-amber-600/40">
+                  <div className="flex items-center justify-between gap-1.5 text-xs font-bold text-amber-300 mb-2">
+                    <div className="flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-amber-400" />
+                      <span>構築済みデッキ ({matchedDecks.length}件ヒット - タップで全カード一括追加)</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 max-h-72 overflow-y-auto pr-1">
+                    {matchedDecks.map((deck) => (
+                      <div
+                        key={deck.id}
+                        className="flex items-center justify-between gap-3 p-2 bg-slate-900/90 hover:bg-slate-800 border border-amber-500/30 rounded-xl transition"
+                      >
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs text-white truncate">{deck.name}</div>
+                          <div className="text-[11px] text-amber-400/90 font-mono">
+                            {deck.code} • 全{deck.uniqueCards}種 / 計{deck.totalCards}枚
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={isAddingDeck}
+                          onClick={() => handleAddDeck(deck)}
+                          className="shrink-0 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition flex items-center gap-1 shadow disabled:opacity-50"
+                        >
+                          {isAddingDeck ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>一括追加 ({deck.totalCards}枚)</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ドロップダウン内 ソート＆カードタイプ絞り込みバー */}
               <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur px-3 py-2 border-b border-slate-800 space-y-1.5">
                 <div className="flex items-center justify-between gap-2 text-[11px]">
@@ -688,6 +1095,14 @@ export default function CardRegisterBar({
                           <span className="text-indigo-400 font-mono">{card.pack}</span>
                           {card.race && <span className="ml-2 text-slate-500">[{card.race}]</span>}
                         </div>
+                        {card.ability_text && (
+                          <div
+                            className="text-[11px] text-slate-300/90 line-clamp-2 mt-1 leading-relaxed bg-slate-950/50 rounded px-2 py-1 border border-slate-800/80"
+                            title={card.ability_text}
+                          >
+                            {card.ability_text}
+                          </div>
+                        )}
                       </div>
 
                       {/* クイック追加アクション（クリックで直接追加、ドロップダウン維持） */}
@@ -820,6 +1235,9 @@ export default function CardRegisterBar({
         </div>
       </div>
 
+      {/* デュエプレ風 詳細フィルターパネル */}
+      {showFilterPanel && renderDuelpFilters(false)}
+
       {/* 選択されたカードのクイックプレビュー */}
       {selectedCard && (
         <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
@@ -861,7 +1279,7 @@ export default function CardRegisterBar({
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="font-bold text-white text-base sm:text-lg">
-                      「{query}」の検索結果
+                      {query.trim() ? `「${query}」の検索結果` : '絞り込み検索結果'}
                     </h3>
                     <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-600/20 text-blue-300 border border-blue-500/30">
                       {displaySuggestions.length} 件
@@ -904,61 +1322,65 @@ export default function CardRegisterBar({
             </div>
 
             {/* 絞り込み & ソートバー */}
-            <div className="px-4 py-2.5 bg-slate-950/70 border-b border-slate-800 flex flex-wrap items-center justify-between gap-2 text-xs shrink-0">
-              {/* タイプ絞り込み */}
-              <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
-                {CARD_TYPE_CATEGORIES.map((tf) => (
+            <div className="px-4 py-3 bg-slate-950/75 border-b border-slate-800 space-y-2.5 text-xs shrink-0">
+              {renderDuelpFilters(true)}
+
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-800/80">
+                {/* タイプ絞り込み */}
+                <div className="flex items-center gap-1 overflow-x-auto pb-0.5 scrollbar-none">
+                  {CARD_TYPE_CATEGORIES.map((tf) => (
+                    <button
+                      key={tf.value}
+                      type="button"
+                      onClick={() => setDropdownTypeFilter(tf.value)}
+                      className={`px-2.5 py-1 rounded-lg border text-xs font-semibold whitespace-nowrap transition ${
+                        dropdownTypeFilter === tf.value
+                          ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200'
+                          : 'bg-slate-800/80 border-slate-700/80 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {tf.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* ソート */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="text-slate-500 text-[11px]">並び順:</span>
                   <button
-                    key={tf.value}
                     type="button"
-                    onClick={() => setDropdownTypeFilter(tf.value)}
-                    className={`px-2.5 py-1 rounded-lg border text-xs font-semibold whitespace-nowrap transition ${
-                      dropdownTypeFilter === tf.value
-                        ? 'bg-emerald-600/30 border-emerald-500 text-emerald-200'
-                        : 'bg-slate-800/80 border-slate-700/80 text-slate-400 hover:text-white'
+                    onClick={() => setDropdownSort('relevance')}
+                    className={`px-2 py-1 rounded border text-[11px] font-semibold transition ${
+                      dropdownSort === 'relevance'
+                        ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
                     }`}
                   >
-                    {tf.label}
+                    関連度
                   </button>
-                ))}
-              </div>
-
-              {/* ソート */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-slate-500 text-[11px]">並び順:</span>
-                <button
-                  type="button"
-                  onClick={() => setDropdownSort('relevance')}
-                  className={`px-2 py-1 rounded border text-[11px] font-semibold transition ${
-                    dropdownSort === 'relevance'
-                      ? 'bg-blue-600/30 border-blue-500 text-blue-200'
-                      : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  関連度
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDropdownSort('cost_asc')}
-                  className={`inline-flex items-center gap-0.5 px-2 py-1 rounded border text-[11px] font-semibold transition ${
-                    dropdownSort === 'cost_asc'
-                      ? 'bg-blue-600/30 border-blue-500 text-blue-200'
-                      : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <ArrowUp className="w-3 h-3" /> コスト順
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDropdownSort('rarity_desc')}
-                  className={`inline-flex items-center gap-0.5 px-2 py-1 rounded border text-[11px] font-semibold transition ${
-                    dropdownSort === 'rarity_desc'
-                      ? 'bg-amber-600/30 border-amber-500 text-amber-200'
-                      : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Sparkles className="w-3 h-3 text-amber-400" /> レア度順
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setDropdownSort('cost_asc')}
+                    className={`inline-flex items-center gap-0.5 px-2 py-1 rounded border text-[11px] font-semibold transition ${
+                      dropdownSort === 'cost_asc'
+                        ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <ArrowUp className="w-3 h-3" /> コスト順
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDropdownSort('rarity_desc')}
+                    className={`inline-flex items-center gap-0.5 px-2 py-1 rounded border text-[11px] font-semibold transition ${
+                      dropdownSort === 'rarity_desc'
+                        ? 'bg-amber-600/30 border-amber-500 text-amber-200'
+                        : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <Sparkles className="w-3 h-3 text-amber-400" /> レア度順
+                  </button>
+                </div>
               </div>
             </div>
 

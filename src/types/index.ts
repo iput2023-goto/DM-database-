@@ -18,6 +18,7 @@ export interface CardFace {
   power: string;
   race: string;
   image: string;
+  skills?: string;
 }
 
 export interface CardMaster {
@@ -35,6 +36,8 @@ export interface CardMaster {
   image: string;
   /** 裏面・覚醒面などの別名（" / " 区切り） */
   alt_names: string | null;
+  /** 特殊能力・効果テキスト */
+  ability_text?: string | null;
   /** 全面の情報（表面が先頭） */
   faces: CardFace[];
 }
@@ -57,6 +60,7 @@ export interface InventoryItem {
   card_image: string;
   card_alt_names: string | null;
   card_faces_json: string | null;
+  card_ability_text?: string | null;
   count: number;
   condition: string;
   memo: string;

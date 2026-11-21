@@ -40,6 +40,7 @@ const existingCols = new Set(db.prepare('PRAGMA table_info(cards)').all().map((c
 if (!existingCols.has('alt_names')) db.exec('ALTER TABLE cards ADD COLUMN alt_names TEXT');
 if (!existingCols.has('faces_json')) db.exec('ALTER TABLE cards ADD COLUMN faces_json TEXT');
 if (!existingCols.has('search_key')) db.exec('ALTER TABLE cards ADD COLUMN search_key TEXT');
+if (!existingCols.has('ability_text')) db.exec('ALTER TABLE cards ADD COLUMN ability_text TEXT');
 
 function setSyncState(key, value) {
   db.prepare('INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)').run(key, String(value));
@@ -99,6 +100,27 @@ function pick(block, regex) {
   return m ? m[1].trim() : '';
 }
 
+// 特殊能力テキストを抽出・整形
+function extractSkills(block) {
+  const m = block.match(/<td class=['"]skills(?:\s+full)?['"][^>]*>([\s\S]*?)<\/td>/);
+  if (!m) return '';
+  return m[1]
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0*39;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\r/g, '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .trim();
+}
+
 // 1面分（card-itself ブロック）を解析
 function parseFace(block) {
   const nameMatch = block.match(/<h3 class='card-name'>([^<]+)<span class='packname'>(?:<span[^>]*>)?\(([^)]+)\)/);
@@ -117,6 +139,7 @@ function parseFace(block) {
     power: pick(block, /<td class='power'>([^<]*)<\/td>/),
     race: pick(block, /<td class='race'>([^<]*)<\/td>/),
     image: img ? 'https://dm.takaratomy.co.jp' + img : '',
+    skills: extractSkills(block),
   };
 }
 
@@ -129,18 +152,28 @@ function parseCardDetail(cardId, html) {
   if (faces.length === 0) {
     const t = html.match(/<title>([^<(]+)(?:\(([^)]+)\))?\s*\|\s*デュエル・マスターズ<\/title>/);
     if (!t) return null;
-    faces.push({ name: t[1].trim(), pack: t[2] ? t[2].trim() : '', type: '', civil: '', rarity: '', cost: null, power: '', race: '', image: '' });
+    faces.push({ name: t[1].trim(), pack: t[2] ? t[2].trim() : '', type: '', civil: '', rarity: '', cost: null, power: '', race: '', image: '', skills: '' });
   }
 
   const front = faces[0];
   // 表面と異なる名前の面を「別名（裏面など）」として保持
   const altNames = [...new Set(faces.slice(1).map((f) => f.name).filter((n) => n && n !== front.name))];
 
+  const abilityParts = [];
+  if (front.skills) abilityParts.push(front.skills);
+  for (let i = 1; i < faces.length; i++) {
+    if (faces[i].skills) {
+      abilityParts.push(`【${faces[i].name}】\n${faces[i].skills}`);
+    }
+  }
+  const abilityText = abilityParts.join('\n');
+
   return {
     cardId,
     ...front,
     rarity: front.rarity || faces.find((f) => f.rarity)?.rarity || '',
     altNames,
+    abilityText,
     faces,
   };
 }
@@ -222,8 +255,8 @@ async function runSync(options = {}) {
     backfillSearchKeys();
 
     const upsertStmt = db.prepare(`
-      INSERT OR REPLACE INTO cards (id, name, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json, search_key)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT OR REPLACE INTO cards (id, name, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json, search_key, ability_text)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const upsertMany = db.transaction((cards) => {
       for (const c of cards) {
@@ -231,7 +264,8 @@ async function runSync(options = {}) {
           c.cardId, c.name, c.pack, c.type, c.civil, c.rarity, c.cost, c.power, c.race, c.image,
           c.altNames.length ? c.altNames.join(' / ') : null,
           JSON.stringify(c.faces),
-          searchKeyFor(c)
+          searchKeyFor(c),
+          c.abilityText || ''
         );
       }
     });

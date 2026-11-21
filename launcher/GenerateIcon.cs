@@ -206,7 +206,18 @@ class GenerateIcon
                 bw.Write(pngBuffers[i]);
             }
         }
-        Console.WriteLine("Generated multi-size icon: " + outPath);
+
+        Directory.CreateDirectory("android\\res\\mipmap-xxhdpi");
+        using (Bitmap bmp192 = RenderIconBitmap(192))
+        {
+            bmp192.Save("android\\res\\mipmap-xxhdpi\\ic_launcher.png", ImageFormat.Png);
+            bmp192.Save("public\\icon-192.png", ImageFormat.Png);
+        }
+        using (Bitmap bmp512 = RenderIconBitmap(512))
+        {
+            bmp512.Save("public\\icon-512.png", ImageFormat.Png);
+        }
+        Console.WriteLine("Generated multi-size icon and PNGs: " + outPath);
     }
 }
 

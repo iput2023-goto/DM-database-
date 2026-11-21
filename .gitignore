@@ -4,6 +4,7 @@ node_modules/
 # Next.js build output
 .next/
 out/
+.desktop_app_profile/
 
 # SQLite WAL / shared memory files
 *.db-shm
@@ -15,11 +16,4 @@ out/
 .DS_Store
 Thumbs.db
 *.log
-
-# Android local & builds
-android/local.properties
-android/.gradle/
-android/app/build/
-android/build/
-*.apk
 

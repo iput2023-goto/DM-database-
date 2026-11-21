@@ -54,6 +54,7 @@ export async function GET(request: Request) {
         c.image AS card_image,
         c.alt_names AS card_alt_names,
         c.faces_json AS card_faces_json,
+        c.ability_text AS card_ability_text,
         i.count,
         i.condition,
         i.memo,
@@ -75,13 +76,52 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const db = getDb();
+
+    // 複数カードの一括登録 (構築済みデッキ追加など)
+    if (Array.isArray(body.items)) {
+      const storage_id = body.storage_id;
+      if (!storage_id) {
+        return NextResponse.json({ error: '保管場所を選択してください' }, { status: 400 });
+      }
+
+      const insertMany = db.transaction((itemsList: Array<{ card_id: string; count: number }>) => {
+        let addedTotal = 0;
+        for (const item of itemsList) {
+          if (!item.card_id) continue;
+          const c = item.count || 1;
+          const cond = 'プレイ用';
+          const existing = db.prepare(`
+            SELECT id, count FROM inventory 
+            WHERE storage_id = ? AND card_id = ? AND condition = ?
+          `).get(storage_id, item.card_id, cond) as { id: number; count: number } | undefined;
+
+          if (existing) {
+            db.prepare(`
+              UPDATE inventory 
+              SET count = ?, updated_at = CURRENT_TIMESTAMP
+              WHERE id = ?
+            `).run(existing.count + c, existing.id);
+          } else {
+            db.prepare(`
+              INSERT INTO inventory (storage_id, card_id, count, condition, memo)
+              VALUES (?, ?, ?, ?, '')
+            `).run(storage_id, item.card_id, c, cond);
+          }
+          addedTotal += c;
+        }
+        return addedTotal;
+      });
+
+      const totalCount = insertMany(body.items);
+      return NextResponse.json({ success: true, count: totalCount, itemsCount: body.items.length });
+    }
+
     const { storage_id, card_id, count = 1, condition = 'プレイ用', memo = '' } = body;
 
     if (!storage_id || !card_id) {
       return NextResponse.json({ error: '保管場所とカードを選択してください' }, { status: 400 });
     }
-
-    const db = getDb();
 
     // 同一ストレージ・同一カード・同一状態の既存エントリをチェック
     const existing = db.prepare(`
@@ -113,23 +153,19 @@ export async function POST(request: Request) {
   }
 }
 
-/** ストレージ内のカードを一括全削除 */
 export async function DELETE(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const storageId = searchParams.get('storageId');
-
     const db = getDb();
+
     if (storageId && storageId !== 'all') {
-      const sid = parseInt(storageId, 10);
-      db.prepare('DELETE FROM inventory WHERE storage_id = ?').run(sid);
-      return NextResponse.json({ success: true, clearedStorageId: sid });
-    } else if (storageId === 'all') {
-      db.prepare('DELETE FROM inventory').run();
-      return NextResponse.json({ success: true, clearedAll: true });
+      db.prepare('DELETE FROM inventory WHERE storage_id = ?').run(parseInt(storageId, 10));
     } else {
-      return NextResponse.json({ error: 'storageId を指定してください' }, { status: 400 });
+      db.prepare('DELETE FROM inventory').run();
     }
+
+    return NextResponse.json({ success: true });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

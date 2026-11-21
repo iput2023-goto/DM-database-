@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import path from 'path';
-import { buildSearchKey } from './normalize';
+import { buildSearchKey, normalizeForSearch } from './normalize';
 
 const DB_PATH = path.join(process.cwd(), 'dm_cards.db');
 
@@ -12,6 +12,7 @@ export function getDb(): Database.Database {
   dbInstance = new Database(DB_PATH);
   dbInstance.pragma('journal_mode = WAL');
   dbInstance.pragma('foreign_keys = ON');
+  dbInstance.function('norm_effect', (s: string | null) => normalizeForSearch(s));
 
   // テーブルの作成
   dbInstance.exec(`
@@ -70,6 +71,7 @@ export function getDb(): Database.Database {
   if (!cols.has('alt_names')) dbInstance.exec('ALTER TABLE cards ADD COLUMN alt_names TEXT');
   if (!cols.has('faces_json')) dbInstance.exec('ALTER TABLE cards ADD COLUMN faces_json TEXT');
   if (!cols.has('search_key')) dbInstance.exec('ALTER TABLE cards ADD COLUMN search_key TEXT');
+  if (!cols.has('ability_text')) dbInstance.exec('ALTER TABLE cards ADD COLUMN ability_text TEXT');
 
   // 検索キーが未設定のカードを補完
   const missing = dbInstance

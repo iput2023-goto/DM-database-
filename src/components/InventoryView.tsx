@@ -35,7 +35,7 @@ interface InventoryViewProps {
   selectedStorageId: number | 'all';
   onUpdateCount: (id: number, newCount: number) => void;
   onDeleteItem: (id: number) => void;
-  onClearStorage?: (storageId: number | 'all') => void;
+  onClearStorageCards?: (storageId: number | 'all') => void;
   onSelectCardDetail?: (item: InventoryItem) => void;
 }
 
@@ -62,6 +62,40 @@ export const CARD_TYPE_CATEGORIES = [
   { label: 'GR / オーラ', value: 'GR / オーラ' },
   { label: 'フィールド / 城 / ギア', value: 'フィールド / 城 / ギア' },
   { label: 'その他', value: 'その他' },
+] as const;
+
+export const CIVIL_FILTER_OPTIONS = [
+  { label: '火', value: '火', activeClass: 'bg-red-600/40 border-red-500 text-red-200' },
+  { label: '水', value: '水', activeClass: 'bg-sky-600/40 border-sky-500 text-sky-200' },
+  { label: '自然', value: '自然', activeClass: 'bg-emerald-600/40 border-emerald-500 text-emerald-200' },
+  { label: '光', value: '光', activeClass: 'bg-yellow-500/35 border-yellow-400 text-yellow-200' },
+  { label: '闇', value: '闇', activeClass: 'bg-purple-600/40 border-purple-500 text-purple-200' },
+  { label: 'ゼロ', value: 'ゼロ', activeClass: 'bg-slate-600/50 border-slate-400 text-slate-100' },
+] as const;
+
+export const COST_FILTER_OPTIONS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10+'] as const;
+
+export const ABILITY_QUICK_TAGS = [
+  { label: 'S・トリガー', keyword: 'S・トリガー' },
+  { label: 'G・ストライク', keyword: 'G・ストライク' },
+  { label: 'ブロッカー', keyword: 'ブロッカー' },
+  { label: 'スピードアタッカー', keyword: 'スピードアタッカー' },
+  { label: 'マッハファイター', keyword: 'マッハファイター' },
+  { label: 'スレイヤー', keyword: 'スレイヤー' },
+  { label: 'ガードマン', keyword: 'ガードマン' },
+  { label: 'ジャストダイバー', keyword: 'ジャストダイバー' },
+  { label: 'W・ブレイカー', keyword: 'W・ブレイカー' },
+  { label: 'T・ブレイカー', keyword: 'T・ブレイカー' },
+  { label: '革命チェンジ', keyword: '革命チェンジ' },
+  { label: '侵略', keyword: '侵略' },
+  { label: 'ヨビニオン', keyword: 'ヨビニオン' },
+  { label: 'ハイパー化', keyword: 'ハイパー' },
+  { label: 'メクレイド', keyword: 'メクレイド' },
+  { label: 'マナ加速', keyword: 'マナゾーンに置' },
+  { label: 'ドロー', keyword: 'カードを引' },
+  { label: '墓地利用', keyword: '墓地から' },
+  { label: '踏み倒し', keyword: 'コストを支払わずに' },
+  { label: 'シールド追加', keyword: 'シールド化' },
 ] as const;
 
 const TYPE_GROUP_ORDER = [
@@ -157,35 +191,57 @@ export default function InventoryView({
   selectedStorageId,
   onUpdateCount,
   onDeleteItem,
-  onClearStorage,
+  onClearStorageCards,
   onSelectCardDetail,
 }: InventoryViewProps) {
   const [filterQuery, setFilterQuery] = useState('');
-  const [selectedCivil, setSelectedCivil] = useState<string>('all');
+  const [selectedCivils, setSelectedCivils] = useState<string[]>([]);
+  const [civilMode, setCivilMode] = useState<'or' | 'and' | 'mono' | 'multi'>('or');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [selectedRarity, setSelectedRarity] = useState<string>('all');
-  const [selectedCost, setSelectedCost] = useState<string>('all');
+  const [selectedCosts, setSelectedCosts] = useState<string[]>([]);
+  const [selectedEffectTags, setSelectedEffectTags] = useState<string[]>([]);
+  const [effectQuery, setEffectQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortKey>('cost_asc');
   const [groupBy, setGroupBy] = useState<GroupByKey>('none');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
+  const [showMobileFilters, setShowMobileFilters] = useState<boolean>(false);
 
-  // 削除時の確認ポップアップON/OFF設定（localStorageで永続化）
+  const toggleCivil = (val: string) => {
+    setSelectedCivils((prev) => (prev.includes(val) ? prev.filter((c) => c !== val) : [...prev, val]));
+  };
+
+  const toggleCost = (val: string) => {
+    setSelectedCosts((prev) => (prev.includes(val) ? prev.filter((c) => c !== val) : [...prev, val]));
+  };
+
+  const toggleEffectTag = (kw: string) => {
+    setSelectedEffectTags((prev) => (prev.includes(kw) ? prev.filter((k) => k !== kw) : [...prev, kw]));
+  };
+
+  // 削除時の確認ポップアップON/OFF設定（localStorageで永続化、デフォルトは確認なし即削除モード）
   const [confirmDelete, setConfirmDelete] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('dm_vault_confirm_delete');
+      const saved = localStorage.getItem('dm_vault_confirm_delete_v2');
       if (saved !== null) return saved === 'true';
     }
-    return true; // デフォルトは安全のためON
+    return false;
   });
 
-  const [isClearing, setIsClearing] = useState(false);
-
-  // 確認ポップアップ設定の変更
   const handleToggleConfirmDelete = (val: boolean) => {
     setConfirmDelete(val);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('dm_vault_confirm_delete', String(val));
+      localStorage.setItem('dm_vault_confirm_delete_v2', String(val));
     }
+  };
+
+  const handleCardDelete = (item: InventoryItem) => {
+    if (confirmDelete) {
+      if (!confirm(`「${item.card_name}」を保管リストから削除しますか？`)) {
+        return;
+      }
+    }
+    onDeleteItem(item.id);
   };
 
   const currentStorage = useMemo(() => {
@@ -193,45 +249,33 @@ export default function InventoryView({
     return storages.find((s) => s.id === selectedStorageId);
   }, [selectedStorageId, storages]);
 
-  const civilFilters = [
-    { label: 'すべて', value: 'all' },
-    { label: '火', value: '火' },
-    { label: '水', value: '水' },
-    { label: '自然', value: '自然' },
-    { label: '光', value: '光' },
-    { label: '闇', value: '闇' },
-    { label: '多色', value: '多色' },
-    { label: 'ゼロ', value: 'ゼロ' },
-  ];
-
-  const costFilters = [
-    { label: 'すべて', value: 'all' },
-    { label: '1', value: '1' },
-    { label: '2', value: '2' },
-    { label: '3', value: '3' },
-    { label: '4', value: '4' },
-    { label: '5', value: '5' },
-    { label: '6', value: '6' },
-    { label: '7', value: '7' },
-    { label: '8', value: '8' },
-    { label: '9', value: '9' },
-    { label: '10+', value: '10+' },
-  ];
-
   // フィルタリング＆ソート処理
   const filteredAndSortedItems = useMemo(() => {
+    const effectTokens = [
+      ...selectedEffectTags,
+      ...effectQuery.split(/[\s,、　]+/).filter(Boolean),
+    ]
+      .map((t) => normalizeForSearch(t))
+      .filter(Boolean);
+
     const filtered = items.filter((item) => {
       // ストレージ絞り込み
       if (selectedStorageId !== 'all' && item.storage_id !== selectedStorageId) {
         return false;
       }
 
-      // 文明絞り込み
-      if (selectedCivil !== 'all') {
-        if (selectedCivil === '多色') {
-          if (!item.card_civil.includes('/') && item.card_civil.length <= 2) return false;
+      // 文明・単色/多色絞り込み
+      const cardCivil = item.card_civil || '';
+      const isMulti = cardCivil.includes('/') || cardCivil.length > 2;
+      if (civilMode === 'mono' && isMulti) return false;
+      if (civilMode === 'multi' && !isMulti) return false;
+      if (selectedCivils.length > 0) {
+        const matchesCiv = (target: string) =>
+          target === 'ゼロ' ? !cardCivil || cardCivil.includes('ゼロ') || cardCivil.includes('無色') : cardCivil.includes(target);
+        if (civilMode === 'and') {
+          if (!selectedCivils.every(matchesCiv)) return false;
         } else {
-          if (!item.card_civil.includes(selectedCivil)) return false;
+          if (!selectedCivils.some(matchesCiv)) return false;
         }
       }
 
@@ -248,17 +292,22 @@ export default function InventoryView({
         return false;
       }
 
-      // コスト絞り込み
-      if (selectedCost !== 'all') {
+      // コスト絞り込み（複数選択 & 10+ 対応）
+      if (selectedCosts.length > 0) {
         if (item.card_cost === null || item.card_cost === undefined) return false;
-        if (selectedCost === '10+') {
-          if (item.card_cost < 10) return false;
-        } else {
-          if (item.card_cost !== parseInt(selectedCost, 10)) return false;
-        }
+        const costMatched = selectedCosts.some((c) =>
+          c === '10+' ? item.card_cost! >= 10 : item.card_cost === parseInt(c, 10)
+        );
+        if (!costMatched) return false;
       }
 
-      // キーワード絞り込み（フリガナ・裏面・覚醒面の名前も対象）
+      // 効果・能力絞り込み
+      if (effectTokens.length > 0) {
+        const normAbility = normalizeForSearch(item.card_ability_text || '');
+        if (!effectTokens.every((tok) => normAbility.includes(tok))) return false;
+      }
+
+      // キーワード絞り込み（フリガナ・裏面・覚醒面・効果テキストも対象）
       if (filterQuery.trim()) {
         const q = normalizeForSearch(filterQuery);
         const targets = [
@@ -270,6 +319,7 @@ export default function InventoryView({
           item.card_race,
           item.card_type,
           item.card_id,
+          item.card_ability_text,
         ];
         if (!targets.some((t) => normalizeForSearch(t).includes(q))) return false;
       }
@@ -330,7 +380,19 @@ export default function InventoryView({
       // updated_desc
       return (b.updated_at || '').localeCompare(a.updated_at || '');
     });
-  }, [items, selectedStorageId, selectedCivil, selectedType, selectedRarity, selectedCost, filterQuery, sortBy]);
+  }, [
+    items,
+    selectedStorageId,
+    selectedCivils,
+    civilMode,
+    selectedType,
+    selectedRarity,
+    selectedCosts,
+    selectedEffectTags,
+    effectQuery,
+    filterQuery,
+    sortBy,
+  ]);
 
   // グループ分け処理
   const groupedSections = useMemo(() => {
@@ -380,46 +442,24 @@ export default function InventoryView({
 
   const totalFilteredCards = filteredAndSortedItems.reduce((acc, cur) => acc + cur.count, 0);
   const hasActiveFilters =
-    selectedCivil !== 'all' ||
+    selectedCivils.length > 0 ||
+    civilMode !== 'or' ||
     selectedType !== 'all' ||
     selectedRarity !== 'all' ||
-    selectedCost !== 'all' ||
+    selectedCosts.length > 0 ||
+    selectedEffectTags.length > 0 ||
+    effectQuery.trim() !== '' ||
     filterQuery.trim() !== '';
 
   const resetFilters = () => {
-    setSelectedCivil('all');
+    setSelectedCivils([]);
+    setCivilMode('or');
     setSelectedType('all');
     setSelectedRarity('all');
-    setSelectedCost('all');
+    setSelectedCosts([]);
+    setSelectedEffectTags([]);
+    setEffectQuery('');
     setFilterQuery('');
-  };
-
-  // 個別カード削除ハンドラー（confirmDelete設定に連動）
-  const handleCardDelete = (item: InventoryItem) => {
-    if (confirmDelete) {
-      if (!confirm(`「${item.card_name}」を保管リストから削除しますか？`)) {
-        return;
-      }
-    }
-    onDeleteItem(item.id);
-  };
-
-  // ストレージ内のカード全削除ハンドラー
-  const handleClearCurrentStorage = async () => {
-    if (!onClearStorage) return;
-
-    const storageName = currentStorage ? `ストレージ「${currentStorage.name}」` : 'すべてのストレージ';
-    const countText = totalFilteredCards > 0 ? `（合計 ${totalFilteredCards}枚）` : '';
-    const confirmMsg = `${storageName} にあるカード${countText}をすべて削除しますか？\n※この操作は取り消せません。`;
-
-    if (!confirm(confirmMsg)) return;
-
-    setIsClearing(true);
-    try {
-      await onClearStorage(selectedStorageId);
-    } finally {
-      setIsClearing(false);
-    }
   };
 
   return (
@@ -444,39 +484,20 @@ export default function InventoryView({
           )}
         </div>
 
-        {/* 検索・表示切り替え・削除確認設定・全削除 */}
+        {/* 検索・表示切り替え */}
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* 削除確認ポップアップのON/OFF */}
-          <label
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white cursor-pointer select-none transition"
-            title="チェックを外すと、カードのゴミ箱アイコンを押した際に確認ポップアップを出さず直接削除します"
+          <button
+            type="button"
+            onClick={() => handleToggleConfirmDelete(!confirmDelete)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition shadow-sm ${
+              confirmDelete
+                ? 'bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
+                : 'bg-emerald-950/60 hover:bg-emerald-900/70 border-emerald-600/70 text-emerald-300 hover:text-white'
+            }`}
+            title="クリックで削除時の確認メッセージ表示（ON / OFF）を切り替えます"
           >
-            <input
-              type="checkbox"
-              checked={confirmDelete}
-              onChange={(e) => handleToggleConfirmDelete(e.target.checked)}
-              className="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer"
-            />
-            <span>削除時の確認</span>
-          </label>
-
-          {/* ストレージ内カード全削除ボタン */}
-          {onClearStorage && (
-            <button
-              type="button"
-              disabled={filteredAndSortedItems.length === 0 || isClearing}
-              onClick={handleClearCurrentStorage}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 border border-red-800/50 hover:border-red-700 text-[11px] font-semibold transition disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-              title={
-                currentStorage
-                  ? `「${currentStorage.name}」内のカードをすべて削除`
-                  : 'すべての保管カードを一括全削除'
-              }
-            >
-              <Trash2 className="w-3.5 h-3.5 text-red-400" />
-              <span>{currentStorage ? 'このストレージを空にする' : '全カードを削除'}</span>
-            </button>
-          )}
+            <span>{confirmDelete ? '🔔 削除確認: ON' : '⚡ 削除確認: OFF (即削除)'}</span>
+          </button>
 
           <div className="relative w-44 sm:w-56">
             <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
@@ -509,11 +530,96 @@ export default function InventoryView({
               <List className="w-4 h-4" />
             </button>
           </div>
+
+          {onClearStorageCards && totalFilteredCards > 0 && (
+            <button
+              type="button"
+              onClick={() => onClearStorageCards(selectedStorageId)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-950/70 hover:bg-red-900/80 border border-red-700/60 text-red-300 hover:text-white text-xs font-bold transition shadow-sm"
+              title={
+                currentStorage
+                  ? `「${currentStorage.name}」内のカードをすべて削除する`
+                  : 'すべてのストレージの保管カードを一括削除する'
+              }
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{currentStorage ? 'ストレージ内を全削除' : '全カード一括削除'}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* スマホ向けクイック文明バー & 詳細フィルター開閉ボタン */}
+      <div className="md:hidden space-y-2 mb-3 pb-2.5 border-b border-slate-800/80">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedCivils([]);
+              setCivilMode('or');
+            }}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+              selectedCivils.length === 0 && civilMode === 'or'
+                ? 'bg-blue-600/30 border-blue-500 text-blue-200'
+                : 'bg-slate-800/70 border-slate-700/70 text-slate-400'
+            }`}
+          >
+            全文明
+          </button>
+          {CIVIL_FILTER_OPTIONS.map((cf) => {
+            const active = selectedCivils.includes(cf.value);
+            return (
+              <button
+                key={cf.value}
+                type="button"
+                onClick={() => toggleCivil(cf.value)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+                  active ? cf.activeClass : 'bg-slate-800/70 border-slate-700/70 text-slate-400'
+                }`}
+              >
+                {cf.label}
+              </button>
+            );
+          })}
+          <button
+            type="button"
+            onClick={() => setCivilMode((m) => (m === 'multi' ? 'or' : 'multi'))}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+              civilMode === 'multi'
+                ? 'bg-amber-600/35 border-amber-400 text-amber-200'
+                : 'bg-slate-800/70 border-slate-700/70 text-slate-400'
+            }`}
+          >
+            多色
+          </button>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setShowMobileFilters((v) => !v)}
+            className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold border flex items-center justify-center gap-1.5 transition ${
+              showMobileFilters || hasActiveFilters
+                ? 'bg-indigo-600/20 border-indigo-500/60 text-indigo-200'
+                : 'bg-slate-800 border-slate-700 text-slate-300'
+            }`}
+          >
+            <Filter className="w-3.5 h-3.5" />
+            <span>{showMobileFilters ? '詳細フィルター・並び順を閉じる ▲' : '詳細フィルター・並び順を開く ▼'}</span>
+          </button>
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="py-1.5 px-2.5 rounded-xl text-xs font-medium text-slate-300 bg-slate-800 border border-slate-700 shrink-0"
+            >
+              リセット
+            </button>
+          )}
         </div>
       </div>
 
       {/* 並び替え（ソート）＆ グループ分けバー */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/80">
+      <div className={`${showMobileFilters ? 'flex' : 'hidden md:flex'} flex-wrap items-center justify-between gap-3 pb-3 mb-3 border-b border-slate-800/80`}>
         {/* 並び替えボタン群 */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 font-medium">
@@ -636,7 +742,7 @@ export default function InventoryView({
       </div>
 
       {/* フィルター群（カードタイプ・コスト・文明） */}
-      <div className="space-y-2.5 mb-4 pb-3 border-b border-slate-800/80">
+      <div className={`${showMobileFilters ? 'block' : 'hidden md:block'} space-y-2.5 mb-4 pb-3 border-b border-slate-800/80`}>
         {/* カードタイプフィルター */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
@@ -679,45 +785,100 @@ export default function InventoryView({
           ))}
         </div>
 
-        {/* コストフィルター */}
+        {/* コストフィルター（複数選択可） */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
           <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
             <Filter className="w-3 h-3 text-amber-400" />
             コスト:
           </span>
-          {costFilters.map((cf) => (
-            <button
-              key={cf.value}
-              onClick={() => setSelectedCost(cf.value)}
-              className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
-                selectedCost === cf.value
-                  ? 'bg-amber-600/30 border-amber-500 text-amber-200'
-                  : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
-              }`}
-            >
-              {cf.label}
-            </button>
-          ))}
-        </div>
-
-        {/* 文明フィルター */}
-        <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
-              <Filter className="w-3 h-3 text-blue-400" />
-              文明:
-            </span>
-            {civilFilters.map((cf) => (
+          <button
+            type="button"
+            onClick={() => setSelectedCosts([])}
+            className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+              selectedCosts.length === 0
+                ? 'bg-amber-600/30 border-amber-500 text-amber-200'
+                : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            すべて
+          </button>
+          {COST_FILTER_OPTIONS.map((cv) => {
+            const active = selectedCosts.includes(cv);
+            return (
               <button
-                key={cf.value}
-                onClick={() => setSelectedCivil(cf.value)}
+                key={cv}
+                type="button"
+                onClick={() => toggleCost(cv)}
                 className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
-                  selectedCivil === cf.value
-                    ? 'bg-blue-600/30 border-blue-500 text-blue-300'
+                  active
+                    ? 'bg-amber-600/35 border-amber-400 text-amber-100 shadow-sm'
                     : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {cf.label}
+                {cv}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 文明（マナ）フィルター（複数選択・単色/多色対応） */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none">
+            <span className="text-xs text-slate-400 flex items-center gap-1 mr-1 shrink-0 font-medium">
+              <Filter className="w-3 h-3 text-blue-400" />
+              文明(マナ):
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedCivils([]);
+                setCivilMode('or');
+              }}
+              className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+                selectedCivils.length === 0 && civilMode === 'or'
+                  ? 'bg-blue-600/30 border-blue-500 text-blue-300'
+                  : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              すべて
+            </button>
+            {CIVIL_FILTER_OPTIONS.map((cf) => {
+              const active = selectedCivils.includes(cf.value);
+              return (
+                <button
+                  key={cf.value}
+                  type="button"
+                  onClick={() => toggleCivil(cf.value)}
+                  className={`px-2.5 py-0.5 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
+                    active
+                      ? cf.activeClass
+                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {cf.label}
+                </button>
+              );
+            })}
+            <span className="text-slate-700 mx-0.5">|</span>
+            {(
+              [
+                { label: 'いずれか(OR)', value: 'or' },
+                { label: 'すべて(AND)', value: 'and' },
+                { label: '単色', value: 'mono' },
+                { label: '多色', value: 'multi' },
+              ] as const
+            ).map((m) => (
+              <button
+                key={m.value}
+                type="button"
+                onClick={() => setCivilMode(m.value)}
+                className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition border ${
+                  civilMode === m.value
+                    ? 'bg-indigo-600/35 border-indigo-400 text-indigo-200'
+                    : 'bg-slate-800/40 border-slate-700/50 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                {m.label}
               </button>
             ))}
           </div>
@@ -731,6 +892,42 @@ export default function InventoryView({
               条件をリセット
             </button>
           )}
+        </div>
+
+        {/* 効果・特殊能力フィルター */}
+        <div className="space-y-1.5 pt-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-slate-400 flex items-center gap-1 shrink-0 font-medium">
+              <Sparkles className="w-3 h-3 text-cyan-400" />
+              効果・能力:
+            </span>
+            <input
+              type="text"
+              value={effectQuery}
+              onChange={(e) => setEffectQuery(e.target.value)}
+              placeholder="効果テキストで絞込（例: 山札の上 マナ 墓地から）"
+              className="w-full sm:w-72 bg-slate-950/90 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder:text-slate-500"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            {ABILITY_QUICK_TAGS.map((tag) => {
+              const active = selectedEffectTags.includes(tag.keyword);
+              return (
+                <button
+                  key={tag.label}
+                  type="button"
+                  onClick={() => toggleEffectTag(tag.keyword)}
+                  className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition border ${
+                    active
+                      ? 'bg-cyan-600/35 border-cyan-400 text-cyan-100 shadow-sm'
+                      : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {tag.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -852,26 +1049,26 @@ export default function InventoryView({
                               <div className="flex items-center gap-1">
                                 <button
                                   onClick={() => onUpdateCount(item.id, item.count - 1)}
-                                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                  className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition border border-slate-700/80"
                                   title="1枚減らす"
                                 >
-                                  <Minus className="w-3 h-3" />
+                                  <Minus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                                 </button>
-                                <span className="font-bold text-xs w-6 text-center text-white">
+                                <span className="font-bold text-xs sm:text-xs w-6 text-center text-white">
                                   {item.count}
                                 </span>
                                 <button
                                   onClick={() => onUpdateCount(item.id, item.count + 1)}
-                                  className="p-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition"
+                                  className="w-7 h-7 sm:w-6 sm:h-6 flex items-center justify-center rounded-lg bg-slate-800 hover:bg-slate-700 active:scale-95 text-slate-200 transition border border-slate-700/80"
                                   title="1枚増やす"
                                 >
-                                  <Plus className="w-3 h-3" />
+                                  <Plus className="w-3.5 h-3.5 sm:w-3 sm:h-3" />
                                 </button>
                               </div>
 
                               <button
                                 onClick={() => handleCardDelete(item)}
-                                className="p-1 text-slate-500 hover:text-red-400 transition"
+                                className="p-1.5 sm:p-1 text-slate-500 hover:text-red-400 transition"
                                 title="保管から削除"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
