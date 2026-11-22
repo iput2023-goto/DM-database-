@@ -181,6 +181,34 @@
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     padding: 8px 10px; border-bottom: 1px solid #1e293b;
   }
+  .duelp-panel {
+    margin-top: 8px; padding: 10px; border-radius: 12px;
+    background: #090d16; border: 1px solid #334155;
+  }
+  .duelp-row {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 7px;
+  }
+  .duelp-row:last-child { margin-bottom: 0; }
+  .duelp-label {
+    font-size: 11px; font-weight: 700; color: #94a3b8; margin-right: 2px; flex-shrink: 0;
+  }
+  .chip-civ-fire.active { background: rgba(220,38,38,0.35); border-color: #ef4444; color: #fecaca; }
+  .chip-civ-water.active { background: rgba(2,132,199,0.35); border-color: #0ea5e9; color: #bae6fd; }
+  .chip-civ-nature.active { background: rgba(5,150,105,0.35); border-color: #10b981; color: #a7f3d0; }
+  .chip-civ-light.active { background: rgba(234,179,8,0.3); border-color: #facc15; color: #fef08a; }
+  .chip-civ-dark.active { background: rgba(147,51,234,0.35); border-color: #a855f7; color: #e9d5ff; }
+  .chip-civ-zero.active { background: rgba(100,116,139,0.45); border-color: #94a3b8; color: #f1f5f9; }
+  .chip-mode.active { background: rgba(79,70,229,0.38); border-color: #818cf8; color: #c7d2fe; }
+  .chip-effect.active { background: rgba(217,119,6,0.32); border-color: #f59e0b; color: #fde68a; }
+  .ability-preview {
+    font-size: 10px; color: #cbd5e1; line-height: 1.35; margin-top: 3px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .ability-detail-box {
+    text-align: left; background: #090d16; border: 1px solid #334155; border-radius: 12px;
+    padding: 10px 12px; margin-top: 10px; font-size: 12px; line-height: 1.6;
+    color: #e2e8f0; white-space: pre-wrap; max-height: 210px; overflow-y: auto;
+  }
   .toast {
     position: fixed; bottom: 72px; left: 50%; transform: translateX(-50%);
     background: #065f46; border: 1px solid #10b981; color: #ecfdf5;
@@ -225,7 +253,7 @@
           <div style="font-size:13px;font-weight:800;color:#60a5fa;display:flex;align-items:center;gap:5px;">
             <span>➕ カードを検索してストレージに追加</span>
           </div>
-          <span style="font-size:10px;color:#94a3b8;">全24,049枚対応（読み・裏面・型番OK）</span>
+          <span id="masterCardCountText" style="font-size:10px;color:#94a3b8;">全収録カード対応（読み・裏面・型番・効果OK）</span>
         </div>
 
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
@@ -260,6 +288,20 @@
           </button>
         </div>
 
+        <!-- デュエプレ風 マナ・コスト・効果絞り込み開閉バー -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:8px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="btn" id="btnToggleMasterFilter" onclick="toggleMasterFilterPanel()" style="padding:6px 10px;font-size:11px;">
+              🎛 マナ・コスト・効果で絞込 ▼
+            </button>
+            <span id="masterFilterCountBadge" style="display:none;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;background:rgba(37,99,235,0.25);border:1px solid #3b82f6;color:#bfdbfe;"></span>
+          </div>
+          <button class="btn" id="btnResetMasterFilter" onclick="resetMasterFilters()" style="display:none;padding:5px 9px;font-size:11px;color:#fca5a5;border-color:#7f1d1d;">
+            ↺ 条件リセット
+          </button>
+        </div>
+        <div id="masterFilterPanel" class="duelp-panel" style="display:none;"></div>
+
         <!-- リアルタイム検索候補リスト -->
         <div id="masterSuggestList" class="suggest-list" style="display:none;"></div>
       </div>
@@ -282,7 +324,7 @@
         </div>
 
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;">
-          <input type="text" id="invSearchInput" class="input" placeholder="所持カード内を絞り込み..." oninput="renderInventory()" style="flex:1;min-width:130px;padding:7px 10px;font-size:12px;" />
+          <input type="text" id="invSearchInput" class="input" placeholder="所持カード内を絞り込み（名前・効果・型番）..." oninput="renderInventory()" style="flex:1;min-width:130px;padding:7px 10px;font-size:12px;" />
           <select id="sortSelect" class="input" style="width:auto;padding:7px 8px;font-size:12px;" onchange="renderInventory()">
             <option value="cost_asc">コスト小順</option>
             <option value="cost_desc">コスト大順</option>
@@ -293,13 +335,19 @@
             <option value="updated_desc">追加順</option>
           </select>
           <button class="btn" onclick="toggleExtraFilters()" id="btnToggleFilters" style="padding:7px 10px;font-size:11px;">絞り込み ▼</button>
+          <button class="btn" onclick="resetInvFilters()" id="btnResetInvFilters" style="display:none;padding:7px 9px;font-size:11px;color:#fca5a5;border-color:#7f1d1d;">↺</button>
         </div>
 
         <div class="filter-bar" id="civilFilterBar"></div>
         <div id="extraFilterWrap" style="display:none;">
+          <div class="filter-bar" id="civilModeFilterBar"></div>
+          <div class="filter-bar" id="costFilterBar"></div>
           <div class="filter-bar" id="typeFilterBar"></div>
           <div class="filter-bar" id="rarityFilterBar"></div>
-          <div class="filter-bar" id="costFilterBar"></div>
+          <div style="margin:6px 0 4px 0;">
+            <input type="text" id="invEffectInput" class="input" placeholder="✨ 効果・能力で絞り込み (例: S・トリガー ブロッカー)..." oninput="renderInventory();updateInvResetBtn();" style="padding:7px 10px;font-size:12px;" />
+          </div>
+          <div class="filter-bar" id="invAbilityFilterBar"></div>
         </div>
       </div>
 
@@ -346,15 +394,24 @@
         </div>
         <button class="btn" onclick="closeBigSearchModal()">✕ 閉じる</button>
       </div>
-      <div style="padding:10px 14px;border-bottom:1px solid #1e293b;background:#090d16;display:flex;gap:8px;align-items:center;">
-        <input
-          type="text"
-          id="bigModalSearchInput"
-          class="input"
-          placeholder="カード名・読み・型番を入力..."
-          oninput="onBigModalSearchInput()"
-          style="flex:1;padding:8px 10px;"
-        />
+      <div style="padding:10px 14px;border-bottom:1px solid #1e293b;background:#090d16;">
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input
+            type="text"
+            id="bigModalSearchInput"
+            class="input"
+            placeholder="カード名・読み・型番を入力..."
+            oninput="onBigModalSearchInput()"
+            style="flex:1;padding:8px 10px;"
+          />
+          <button class="btn" id="btnToggleModalFilter" onclick="toggleModalFilterPanel()" style="padding:8px 10px;font-size:11px;flex-shrink:0;">
+            🎛 絞込 ▼
+          </button>
+          <button class="btn" id="btnResetModalFilter" onclick="resetMasterFilters()" style="display:none;padding:8px 9px;font-size:11px;color:#fca5a5;border-color:#7f1d1d;flex-shrink:0;">
+            ↺
+          </button>
+        </div>
+        <div id="modalFilterPanel" class="duelp-panel" style="display:none;max-height:42vh;overflow-y:auto;"></div>
       </div>
       <div style="flex:1;overflow-y:auto;padding:12px;" id="bigSearchGridWrap">
         <div id="bigSearchGrid" class="grid"></div>
@@ -425,15 +482,75 @@ try {
   confirmDelete = localStorage.getItem(LS_CONFIRM_DELETE_KEY) === "true";
 } catch (e) {}
 let selectedStorageId = "all";
-let selectedCivil = "all";
+let selectedCivils = [];
+let invCivilMode = "or";
 let selectedType = "all";
 let selectedRarity = "all";
-let selectedCost = "all";
+let selectedCosts = [];
+let selectedInvAbilities = [];
 let showExtraFilters = false;
 let currentDetailInvId = null;
 let currentDetailFaceIdx = 0;
 let allCards = [];
+let allCardsMap = {};
 let recentAddedCounts = {};
+
+let showMasterFilterPanel = false;
+let showModalFilterPanel = false;
+let masterFilter = {
+  civs: [],
+  civMode: "or",
+  costs: [],
+  cardType: "all",
+  abilities: [],
+  abilityText: ""
+};
+
+const CIVIL_OPTIONS = [
+  { label: "火", value: "火", cls: "chip-civ-fire" },
+  { label: "水", value: "水", cls: "chip-civ-water" },
+  { label: "自然", value: "自然", cls: "chip-civ-nature" },
+  { label: "光", value: "光", cls: "chip-civ-light" },
+  { label: "闇", value: "闇", cls: "chip-civ-dark" },
+  { label: "ゼロ", value: "ゼロ", cls: "chip-civ-zero" }
+];
+
+const CIVIL_MODES = [
+  { label: "いずれか(OR)", value: "or" },
+  { label: "すべて(AND)", value: "and" },
+  { label: "単色", value: "mono" },
+  { label: "多色", value: "multi" }
+];
+
+const COST_OPTIONS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
+
+const TYPE_OPTIONS = [
+  "all", "クリーチャー", "進化クリーチャー", "呪文", "ツインパクト",
+  "タマシード", "サイキック", "ドラグハート", "GR / オーラ", "フィールド / 城 / ギア", "その他"
+];
+
+const ABILITY_QUICK_TAGS = [
+  { label: "S・トリガー", keyword: "S・トリガー" },
+  { label: "G・ストライク", keyword: "G・ストライク" },
+  { label: "ブロッカー", keyword: "ブロッカー" },
+  { label: "スピードアタッカー", keyword: "スピードアタッカー" },
+  { label: "マッハファイター", keyword: "マッハファイター" },
+  { label: "スレイヤー", keyword: "スレイヤー" },
+  { label: "ガードマン", keyword: "ガードマン" },
+  { label: "ジャストダイバー", keyword: "ジャストダイバー" },
+  { label: "W・ブレイカー", keyword: "W・ブレイカー" },
+  { label: "T・ブレイカー", keyword: "T・ブレイカー" },
+  { label: "革命チェンジ", keyword: "革命チェンジ" },
+  { label: "侵略", keyword: "侵略" },
+  { label: "ヨビニオン", keyword: "ヨビニオン" },
+  { label: "ハイパー化", keyword: "ハイパー" },
+  { label: "メクレイド", keyword: "メクレイド" },
+  { label: "マナ加速", keyword: "マナゾーンに置" },
+  { label: "ドロー", keyword: "カードを引" },
+  { label: "墓地利用", keyword: "墓地から" },
+  { label: "踏み倒し", keyword: "コストを支払わずに" },
+  { label: "シールド追加", keyword: "シールド化" }
+];
 
 const HIGH_RARITIES = new Set(["DMR","OR","KGM","MAS","MDG","MDS","MSS","MSZ","MHZ","DG","LEG","WVC","VIC","DSR","KGR","SPR"]);
 
@@ -459,6 +576,77 @@ function getCardTypeCat(name, type) {
   if (t.includes("呪文")) return "呪文";
   if (t.includes("フィールド") || t.includes("城") || t.includes("クロスギア")) return "フィールド / 城 / ギア";
   return "その他";
+}
+
+function matchesSingleCivil(cardCivil, target) {
+  const cc = String(cardCivil || "");
+  if (target === "ゼロ") {
+    return !cc || cc.includes("ゼロ") || cc.includes("無色");
+  }
+  return cc.includes(target);
+}
+
+function matchesCivilFilter(cardCivil, selectedList, mode) {
+  const cc = String(cardCivil || "");
+  const isMulti = cc.includes("/") || cc.length > 2;
+  if (mode === "mono" && isMulti) return false;
+  if (mode === "multi" && !isMulti) return false;
+  if (!selectedList || selectedList.length === 0) return true;
+  if (mode === "and") {
+    return selectedList.every(function(cv) { return matchesSingleCivil(cc, cv); });
+  }
+  return selectedList.some(function(cv) { return matchesSingleCivil(cc, cv); });
+}
+
+function matchesCostFilter(cardCost, selectedCostsList) {
+  if (!selectedCostsList || selectedCostsList.length === 0) return true;
+  if (cardCost === null || cardCost === undefined) return false;
+  return selectedCostsList.some(function(ct) {
+    return ct === "10+" ? cardCost >= 10 : cardCost === parseInt(ct, 10);
+  });
+}
+
+function matchesTypeFilter(filterVal, name, type, facesJsonStr) {
+  if (!filterVal || filterVal === "all") return true;
+  const n = String(name || "");
+  const t = String(type || "");
+  if (getCardTypeCat(n, t) === filterVal) return true;
+  const f = String(facesJsonStr || "");
+  if (filterVal === "ツインパクト") {
+    return n.includes(" / ") || n.includes("／") || t.includes("ツインパクト");
+  }
+  if (filterVal === "進化クリーチャー") {
+    return t.includes("進化") || f.includes("進化");
+  }
+  if (filterVal === "呪文") {
+    return t.includes("呪文") || f.includes("呪文") || n.includes(" / ") || n.includes("／");
+  }
+  if (filterVal === "GR / オーラ") {
+    return t.includes("GR") || t.includes("オーラ") || f.includes("GR") || f.includes("オーラ");
+  }
+  if (filterVal === "フィールド / 城 / ギア") {
+    return t.includes("フィールド") || t.includes("城") || t.includes("クロスギア") || f.includes("フィールド") || f.includes("城") || f.includes("ギア");
+  }
+  if (filterVal === "クリーチャー") {
+    return (t.includes("クリーチャー") || f.includes("クリーチャー")) && !t.includes("進化") && !t.includes("サイキック") && !t.includes("ドラグハート") && !t.includes("GR");
+  }
+  return t.includes(filterVal) || f.includes(filterVal);
+}
+
+function buildEffectTokens(abilityTags, freeText) {
+  const combined = (abilityTags || []).slice();
+  if (freeText && String(freeText).trim()) {
+    String(freeText).split(/[\s,、　]+/).forEach(function(tok) {
+      if (tok) combined.push(tok);
+    });
+  }
+  return combined.map(normalize).filter(Boolean);
+}
+
+function getItemAbilityText(item) {
+  if (item && item.card_ability_text) return item.card_ability_text;
+  const master = item && allCardsMap[item.card_id];
+  return (master && master.ability_text) ? master.ability_text : "";
 }
 
 function normalize(str) {
@@ -526,22 +714,31 @@ function showToast(msg) {
 }
 
 function parseCardTuples(tuples) {
+  allCardsMap = {};
   allCards = tuples.map(function(t) {
-    const id = t[0], name = t[1], name_ruby = t[2], pack = t[3], type = t[4], civil = t[5], rarity = t[6], cost = t[7], power = t[8], race = t[9], imgShort = t[10], alt_names = t[11], facesShort = t[12];
+    const id = t[0], name = t[1], name_ruby = t[2], pack = t[3], type = t[4], civil = t[5], rarity = t[6], cost = t[7], power = t[8], race = t[9], imgShort = t[10], alt_names = t[11], facesShort = t[12], ability_text = t[13] || "";
     const alts = alt_names ? alt_names.split(" / ") : [];
     const parts = [name, name_ruby].concat(alts, [pack, id, race]).map(normalize).filter(Boolean);
     const sk = "|" + parts.join("|") + "|";
-    return {
+    const cardObj = {
       id: id, name: name, name_ruby: name_ruby, pack: pack, type: type, civil: civil, rarity: rarity, cost: cost, power: power, race: race,
-      image: expandImg(imgShort), alt_names: alt_names, faces_json: facesShort, search_key: sk
+      image: expandImg(imgShort), alt_names: alt_names, faces_json: facesShort, ability_text: ability_text,
+      norm_ability: normalize(ability_text), search_key: sk
     };
+    allCardsMap[id] = cardObj;
+    return cardObj;
   });
+  const countStr = allCards.length.toLocaleString();
   const badge = document.getElementById("dbStatusBadge");
-  if (badge) badge.textContent = "全" + allCards.length.toLocaleString() + "枚 収録済";
+  if (badge) badge.textContent = "全" + countStr + "枚 収録済";
+  const countTextEl = document.getElementById("masterCardCountText");
+  if (countTextEl) countTextEl.textContent = "全" + countStr + "枚対応（読み・裏面・型番・効果OK）";
+
   const currentQ = document.getElementById("masterSearchInput") ? document.getElementById("masterSearchInput").value : "";
-  if (currentQ && currentQ.trim()) {
+  if ((currentQ && currentQ.trim()) || hasActiveMasterFilter()) {
     onMasterSearch();
   }
+  renderInventory();
 }
 
 async function initCardsDb() {
@@ -581,7 +778,7 @@ function updateHeaderStats() {
 function toggleExtraFilters() {
   showExtraFilters = !showExtraFilters;
   document.getElementById("extraFilterWrap").style.display = showExtraFilters ? "block" : "none";
-  document.getElementById("btnToggleFilters").textContent = showExtraFilters ? "絞り込み ▲" : "絞り込み ▼";
+  updateInvFilterToggleLabel();
 }
 
 function renderStorageStrip() {
@@ -628,16 +825,96 @@ function selectStorage(id) {
   renderInventory();
 }
 
-function renderFilterBars() {
-  const civils = ["all", "火", "水", "自然", "光", "闇", "多色", "ゼロ"];
-  document.getElementById("civilFilterBar").innerHTML = civils.map(function(c) {
-    return '<button class="chip ' + (selectedCivil === c ? "active" : "") + '" onclick="selectedCivil=\'' + c + '\';renderFilterBars();renderInventory();">' +
-      (c === "all" ? "全文明" : c) +
-    '</button>';
-  }).join("");
+function toggleInvCivil(civ) {
+  const idx = selectedCivils.indexOf(civ);
+  if (idx >= 0) selectedCivils.splice(idx, 1);
+  else selectedCivils.push(civ);
+  renderFilterBars();
+  renderInventory();
+}
 
-  const types = ["all", "クリーチャー", "進化クリーチャー", "呪文", "ツインパクト", "タマシード", "サイキック", "ドラグハート", "GR / オーラ", "フィールド / 城 / ギア", "その他"];
-  document.getElementById("typeFilterBar").innerHTML = types.map(function(t) {
+function toggleInvCost(costVal) {
+  const idx = selectedCosts.indexOf(costVal);
+  if (idx >= 0) selectedCosts.splice(idx, 1);
+  else selectedCosts.push(costVal);
+  renderFilterBars();
+  renderInventory();
+}
+
+function toggleInvAbility(keyword) {
+  const idx = selectedInvAbilities.indexOf(keyword);
+  if (idx >= 0) selectedInvAbilities.splice(idx, 1);
+  else selectedInvAbilities.push(keyword);
+  renderFilterBars();
+  renderInventory();
+}
+
+function countActiveInvFilters() {
+  let n = 0;
+  if (selectedCivils.length > 0) n += selectedCivils.length;
+  if (invCivilMode !== "or") n++;
+  if (selectedType !== "all") n++;
+  if (selectedRarity !== "all") n++;
+  if (selectedCosts.length > 0) n += selectedCosts.length;
+  if (selectedInvAbilities.length > 0) n += selectedInvAbilities.length;
+  const efEl = document.getElementById("invEffectInput");
+  if (efEl && efEl.value.trim()) n++;
+  const sEl = document.getElementById("invSearchInput");
+  if (sEl && sEl.value.trim()) n++;
+  return n;
+}
+
+function updateInvFilterToggleLabel() {
+  const btn = document.getElementById("btnToggleFilters");
+  const resetBtn = document.getElementById("btnResetInvFilters");
+  const cnt = countActiveInvFilters();
+  if (btn) {
+    btn.textContent = "絞り込み " + (showExtraFilters ? "▲" : "▼") + (cnt > 0 ? " (" + cnt + ")" : "");
+  }
+  if (resetBtn) {
+    resetBtn.style.display = cnt > 0 ? "inline-flex" : "none";
+  }
+}
+
+function updateInvResetBtn() {
+  updateInvFilterToggleLabel();
+}
+
+function resetInvFilters() {
+  selectedCivils = [];
+  invCivilMode = "or";
+  selectedType = "all";
+  selectedRarity = "all";
+  selectedCosts = [];
+  selectedInvAbilities = [];
+  const efEl = document.getElementById("invEffectInput");
+  if (efEl) efEl.value = "";
+  const sEl = document.getElementById("invSearchInput");
+  if (sEl) sEl.value = "";
+  renderFilterBars();
+  renderInventory();
+}
+
+function renderFilterBars() {
+  document.getElementById("civilFilterBar").innerHTML =
+    '<button class="chip ' + (selectedCivils.length === 0 && invCivilMode === "or" ? "active" : "") + '" onclick="selectedCivils=[];invCivilMode=\'or\';renderFilterBars();renderInventory();">全文明</button>' +
+    CIVIL_OPTIONS.map(function(cf) {
+      const active = selectedCivils.includes(cf.value);
+      return '<button class="chip ' + cf.cls + (active ? " active" : "") + '" onclick="toggleInvCivil(\'' + cf.value + '\')">' + cf.label + '</button>';
+    }).join("") +
+    '<button class="chip chip-mode ' + (invCivilMode === "multi" ? "active" : "") + '" onclick="invCivilMode=(invCivilMode===\'multi\'?\'or\':\'multi\');renderFilterBars();renderInventory();">多色</button>' +
+    '<button class="chip chip-mode ' + (invCivilMode === "mono" ? "active" : "") + '" onclick="invCivilMode=(invCivilMode===\'mono\'?\'or\':\'mono\');renderFilterBars();renderInventory();">単色</button>';
+
+  const civModeBar = document.getElementById("civilModeFilterBar");
+  if (civModeBar) {
+    civModeBar.innerHTML =
+      '<span class="duelp-label" style="align-self:center;">文明条件:</span>' +
+      CIVIL_MODES.map(function(m) {
+        return '<button class="chip chip-mode ' + (invCivilMode === m.value ? "active" : "") + '" onclick="invCivilMode=\'' + m.value + '\';renderFilterBars();renderInventory();">' + m.label + '</button>';
+      }).join("");
+  }
+
+  document.getElementById("typeFilterBar").innerHTML = TYPE_OPTIONS.map(function(t) {
     return '<button class="chip ' + (selectedType === t ? "active" : "") + '" onclick="selectedType=\'' + t + '\';renderFilterBars();renderInventory();">' +
       (t === "all" ? "全タイプ" : t) +
     '</button>';
@@ -658,40 +935,52 @@ function renderFilterBars() {
     '</button>';
   }).join("");
 
-  const costs = ["all", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10+"];
-  document.getElementById("costFilterBar").innerHTML = costs.map(function(c) {
-    return '<button class="chip ' + (selectedCost === c ? "active" : "") + '" onclick="selectedCost=\'' + c + '\';renderFilterBars();renderInventory();">' +
-      (c === "all" ? "全コスト" : "コスト " + c) +
-    '</button>';
-  }).join("");
+  document.getElementById("costFilterBar").innerHTML =
+    '<button class="chip ' + (selectedCosts.length === 0 ? "active" : "") + '" onclick="selectedCosts=[];renderFilterBars();renderInventory();">全コスト</button>' +
+    COST_OPTIONS.map(function(c) {
+      return '<button class="chip ' + (selectedCosts.includes(c) ? "active" : "") + '" onclick="toggleInvCost(\'' + c + '\')">コスト ' + c + '</button>';
+    }).join("");
+
+  const abBar = document.getElementById("invAbilityFilterBar");
+  if (abBar) {
+    abBar.innerHTML =
+      '<span class="duelp-label" style="align-self:center;">効果:</span>' +
+      ABILITY_QUICK_TAGS.map(function(tag) {
+        const active = selectedInvAbilities.includes(tag.keyword);
+        return '<button class="chip chip-effect ' + (active ? "active" : "") + '" onclick="toggleInvAbility(\'' + tag.keyword + '\')">' + escapeHtml(tag.label) + '</button>';
+      }).join("");
+  }
+
+  updateInvFilterToggleLabel();
 }
 
 function renderInventory() {
   const q = normalize(document.getElementById("invSearchInput").value);
+  const efEl = document.getElementById("invEffectInput");
+  const effectTokens = buildEffectTokens(selectedInvAbilities, efEl ? efEl.value : "");
   const sortBy = document.getElementById("sortSelect").value;
+  updateInvFilterToggleLabel();
 
   const filtered = state.inventory.filter(function(item) {
     if (selectedStorageId !== "all" && item.storage_id !== selectedStorageId) return false;
-    if (selectedCivil !== "all") {
-      if (selectedCivil === "多色") {
-        if (!(item.card_civil || "").includes("/") && (item.card_civil || "").length <= 2) return false;
-      } else if (!(item.card_civil || "").includes(selectedCivil)) return false;
-    }
-    if (selectedType !== "all") {
-      if (getCardTypeCat(item.card_name, item.card_type) !== selectedType) return false;
-    }
+    if (!matchesCivilFilter(item.card_civil, selectedCivils, invCivilMode)) return false;
+    if (!matchesTypeFilter(selectedType, item.card_name, item.card_type, item.card_faces_json)) return false;
     if (selectedRarity !== "all") {
       const r = String(item.card_rarity || "").trim().toUpperCase();
       if (selectedRarity === "HIGH") { if (!HIGH_RARITIES.has(r)) return false; }
       else if (r !== selectedRarity) return false;
     }
-    if (selectedCost !== "all") {
-      if (item.card_cost === null || item.card_cost === undefined) return false;
-      if (selectedCost === "10+") { if (item.card_cost < 10) return false; }
-      else if (item.card_cost !== parseInt(selectedCost, 10)) return false;
+    if (!matchesCostFilter(item.card_cost, selectedCosts)) return false;
+    const itemAb = getItemAbilityText(item);
+    if (effectTokens.length > 0) {
+      const normAb = normalize(itemAb);
+      if (!effectTokens.every(function(tok) { return normAb.includes(tok); })) return false;
     }
     if (q) {
-      const hay = normalize([item.card_name, item.card_ruby, item.card_alt_names, item.card_pack, item.card_race, item.card_id].join(" "));
+      const hay = normalize([
+        item.card_name, item.card_ruby, item.card_alt_names, item.card_faces_json,
+        item.card_pack, item.card_race, item.card_type, item.card_id, itemAb
+      ].join(" "));
       if (!hay.includes(q)) return false;
     }
     return true;
@@ -715,7 +1004,7 @@ function renderInventory() {
   if (filtered.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:36px 16px;color:#64748b;border:1px dashed #1e293b;border-radius:16px;">' +
       '<div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:4px;">保管中のカードがありません</div>' +
-      '<div style="font-size:11px;">上の「➕ カードを検索してストレージに追加」からカード名を入力して追加してください</div>' +
+      '<div style="font-size:11px;">上の「➕ カードを検索してストレージに追加」または絞り込み条件を変更してください</div>' +
     '</div>';
     return;
   }
@@ -827,31 +1116,245 @@ function clearStorageCards(targetId) {
   showToast(targetStorage ? "「" + targetStorage.name + "」内のカードを全削除しました" : "すべての保管カードを一括削除しました");
 }
 
+function hasActiveMasterFilter() {
+  return (
+    masterFilter.civs.length > 0 ||
+    masterFilter.civMode !== "or" ||
+    masterFilter.costs.length > 0 ||
+    (masterFilter.cardType && masterFilter.cardType !== "all") ||
+    masterFilter.abilities.length > 0 ||
+    (masterFilter.abilityText && masterFilter.abilityText.trim() !== "")
+  );
+}
+
+function countActiveMasterFilters() {
+  let n = 0;
+  if (masterFilter.civs.length > 0) n += masterFilter.civs.length;
+  if (masterFilter.civMode !== "or") n++;
+  if (masterFilter.costs.length > 0) n += masterFilter.costs.length;
+  if (masterFilter.cardType && masterFilter.cardType !== "all") n++;
+  if (masterFilter.abilities.length > 0) n += masterFilter.abilities.length;
+  if (masterFilter.abilityText && masterFilter.abilityText.trim()) n++;
+  return n;
+}
+
+function updateMasterFilterControls() {
+  const activeCount = countActiveMasterFilters();
+  const hasFilter = activeCount > 0;
+
+  const toggleMain = document.getElementById("btnToggleMasterFilter");
+  if (toggleMain) {
+    toggleMain.textContent = "🎛 マナ・コスト・効果で絞込 " + (showMasterFilterPanel ? "▲" : "▼");
+    toggleMain.style.borderColor = hasFilter ? "#3b82f6" : "";
+    toggleMain.style.color = hasFilter ? "#bfdbfe" : "";
+  }
+  const badgeMain = document.getElementById("masterFilterCountBadge");
+  if (badgeMain) {
+    badgeMain.style.display = hasFilter ? "inline-block" : "none";
+    badgeMain.textContent = activeCount + "条件選択中";
+  }
+  const resetMain = document.getElementById("btnResetMasterFilter");
+  if (resetMain) resetMain.style.display = hasFilter ? "inline-flex" : "none";
+
+  const toggleModal = document.getElementById("btnToggleModalFilter");
+  if (toggleModal) {
+    toggleModal.textContent = "🎛 絞込 " + (showModalFilterPanel ? "▲" : "▼") + (hasFilter ? " (" + activeCount + ")" : "");
+    toggleModal.style.borderColor = hasFilter ? "#3b82f6" : "";
+    toggleModal.style.color = hasFilter ? "#bfdbfe" : "";
+  }
+  const resetModal = document.getElementById("btnResetModalFilter");
+  if (resetModal) resetModal.style.display = hasFilter ? "inline-flex" : "none";
+}
+
+function renderSingleDuelpFilterPanel(containerId, sourceKey) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const inputId = sourceKey === "modal" ? "modalAbilityInput" : "masterAbilityInput";
+
+  const civHtml =
+    '<div class="duelp-row">' +
+      '<span class="duelp-label">文明(マナ):</span>' +
+      '<button class="chip ' + (masterFilter.civs.length === 0 && masterFilter.civMode === "or" ? "active" : "") + '" onclick="masterFilter.civs=[];masterFilter.civMode=\'or\';syncMasterFilterChanges();">すべて</button>' +
+      CIVIL_OPTIONS.map(function(cf) {
+        const active = masterFilter.civs.includes(cf.value);
+        return '<button class="chip ' + cf.cls + (active ? " active" : "") + '" onclick="toggleMasterCivil(\'' + cf.value + '\')">' + cf.label + '</button>';
+      }).join("") +
+      '<span style="color:#475569;margin:0 2px;">|</span>' +
+      CIVIL_MODES.map(function(m) {
+        return '<button class="chip chip-mode ' + (masterFilter.civMode === m.value ? "active" : "") + '" onclick="setMasterCivilMode(\'' + m.value + '\')">' + m.label + '</button>';
+      }).join("") +
+    '</div>';
+
+  const costHtml =
+    '<div class="duelp-row">' +
+      '<span class="duelp-label">コスト:</span>' +
+      '<button class="chip ' + (masterFilter.costs.length === 0 ? "active" : "") + '" onclick="masterFilter.costs=[];syncMasterFilterChanges();">すべて</button>' +
+      COST_OPTIONS.map(function(c) {
+        const active = masterFilter.costs.includes(c);
+        return '<button class="chip ' + (active ? "active" : "") + '" onclick="toggleMasterCost(\'' + c + '\')">' + c + '</button>';
+      }).join("") +
+    '</div>';
+
+  const typeHtml =
+    '<div class="duelp-row">' +
+      '<span class="duelp-label">種類:</span>' +
+      TYPE_OPTIONS.map(function(t) {
+        return '<button class="chip ' + (masterFilter.cardType === t ? "active" : "") + '" onclick="setMasterCardType(\'' + t + '\')">' + (t === "all" ? "すべて" : t) + '</button>';
+      }).join("") +
+    '</div>';
+
+  const abInputHtml =
+    '<div class="duelp-row">' +
+      '<span class="duelp-label">効果ワード:</span>' +
+      '<input type="text" id="' + inputId + '" class="input" style="flex:1;min-width:140px;padding:6px 9px;font-size:12px;" placeholder="例: S・トリガー 進化 マナゾーンに置 (空白区切りAND)" value="' + escapeHtml(masterFilter.abilityText) + '" oninput="onMasterAbilityInput(this.value, \'' + sourceKey + '\')" />' +
+    '</div>';
+
+  const abTagsHtml =
+    '<div class="duelp-row">' +
+      '<span class="duelp-label">定番能力:</span>' +
+      ABILITY_QUICK_TAGS.map(function(tag) {
+        const active = masterFilter.abilities.includes(tag.keyword);
+        return '<button class="chip chip-effect ' + (active ? "active" : "") + '" onclick="toggleMasterAbility(\'' + tag.keyword + '\')">' + escapeHtml(tag.label) + '</button>';
+      }).join("") +
+    '</div>';
+
+  el.innerHTML = civHtml + costHtml + typeHtml + abInputHtml + abTagsHtml;
+}
+
+function renderMasterFilterPanels() {
+  renderSingleDuelpFilterPanel("masterFilterPanel", "main");
+  renderSingleDuelpFilterPanel("modalFilterPanel", "modal");
+  updateMasterFilterControls();
+}
+
+function syncMasterFilterChanges() {
+  renderMasterFilterPanels();
+  onMasterSearch();
+  if (document.getElementById("bigSearchModal").classList.contains("open")) {
+    renderBigSearchModalResults();
+  }
+}
+
+function toggleMasterFilterPanel() {
+  showMasterFilterPanel = !showMasterFilterPanel;
+  document.getElementById("masterFilterPanel").style.display = showMasterFilterPanel ? "block" : "none";
+  updateMasterFilterControls();
+}
+
+function toggleModalFilterPanel() {
+  showModalFilterPanel = !showModalFilterPanel;
+  document.getElementById("modalFilterPanel").style.display = showModalFilterPanel ? "block" : "none";
+  updateMasterFilterControls();
+}
+
+function toggleMasterCivil(civ) {
+  const idx = masterFilter.civs.indexOf(civ);
+  if (idx >= 0) masterFilter.civs.splice(idx, 1);
+  else masterFilter.civs.push(civ);
+  syncMasterFilterChanges();
+}
+
+function setMasterCivilMode(mode) {
+  masterFilter.civMode = mode;
+  syncMasterFilterChanges();
+}
+
+function toggleMasterCost(costVal) {
+  const idx = masterFilter.costs.indexOf(costVal);
+  if (idx >= 0) masterFilter.costs.splice(idx, 1);
+  else masterFilter.costs.push(costVal);
+  syncMasterFilterChanges();
+}
+
+function setMasterCardType(typeVal) {
+  masterFilter.cardType = typeVal;
+  syncMasterFilterChanges();
+}
+
+function toggleMasterAbility(keyword) {
+  const idx = masterFilter.abilities.indexOf(keyword);
+  if (idx >= 0) masterFilter.abilities.splice(idx, 1);
+  else masterFilter.abilities.push(keyword);
+  syncMasterFilterChanges();
+}
+
+function onMasterAbilityInput(val, sourceKey) {
+  masterFilter.abilityText = val;
+  const otherId = sourceKey === "modal" ? "masterAbilityInput" : "modalAbilityInput";
+  const otherEl = document.getElementById(otherId);
+  if (otherEl && otherEl.value !== val) {
+    otherEl.value = val;
+  }
+  updateMasterFilterControls();
+  onMasterSearch();
+  if (document.getElementById("bigSearchModal").classList.contains("open")) {
+    renderBigSearchModalResults();
+  }
+}
+
+function resetMasterFilters() {
+  masterFilter = {
+    civs: [],
+    civMode: "or",
+    costs: [],
+    cardType: "all",
+    abilities: [],
+    abilityText: ""
+  };
+  syncMasterFilterChanges();
+}
+
 function searchAllCardsByQuery(rawQuery, maxResults) {
   const q = normalize(rawQuery);
-  if (!q) return [];
-  const exactMarker = "|" + q + "|";
-  const prefixMarker = "|" + q;
+  const effectTokens = buildEffectTokens(masterFilter.abilities, masterFilter.abilityText);
+  const hasFilters = hasActiveMasterFilter();
+  if (!q && !hasFilters) return [];
+
+  const exactMarker = q ? ("|" + q + "|") : "";
+  const prefixMarker = q ? ("|" + q) : "";
   const tier1 = [];
   const tier2 = [];
   const tier3 = [];
 
   for (let i = 0; i < allCards.length; i++) {
     const c = allCards[i];
-    if (!c.search_key.includes(q)) continue;
-    if (c.search_key.includes(exactMarker)) tier1.push(c);
-    else if (c.search_key.includes(prefixMarker)) tier2.push(c);
-    else tier3.push(c);
-    if (tier1.length >= maxResults) break;
+    if (q && !c.search_key.includes(q)) continue;
+    if (!matchesCivilFilter(c.civil, masterFilter.civs, masterFilter.civMode)) continue;
+    if (!matchesCostFilter(c.cost, masterFilter.costs)) continue;
+    if (!matchesTypeFilter(masterFilter.cardType, c.name, c.type, c.faces_json)) continue;
+    if (effectTokens.length > 0) {
+      if (!effectTokens.every(function(tok) { return c.norm_ability.includes(tok); })) continue;
+    }
+
+    if (!q) {
+      tier3.push(c);
+    } else if (c.search_key.includes(exactMarker)) {
+      tier1.push(c);
+    } else if (c.search_key.includes(prefixMarker)) {
+      tier2.push(c);
+    } else {
+      tier3.push(c);
+    }
   }
+
+  const sortCostAsc = function(a, b) { return (a.cost ?? 9999) - (b.cost ?? 9999); };
+  tier1.sort(sortCostAsc);
+  tier2.sort(sortCostAsc);
+  tier3.sort(sortCostAsc);
   return tier1.concat(tier2, tier3).slice(0, maxResults);
 }
 
 function clearMasterSearch() {
   const input = document.getElementById("masterSearchInput");
   input.value = "";
-  document.getElementById("masterSuggestList").style.display = "none";
+  const modalInput = document.getElementById("bigModalSearchInput");
+  if (modalInput) modalInput.value = "";
   document.getElementById("btnClearSearch").style.display = "none";
+  if (hasActiveMasterFilter()) {
+    onMasterSearch();
+  } else {
+    document.getElementById("masterSuggestList").style.display = "none";
+  }
 }
 
 function onMasterKeyDown(e) {
@@ -891,7 +1394,7 @@ function addDeckCards(deckId) {
   let addedTotal = 0;
   for (let i = 0; i < deck.cards.length; i++) {
     const dc = deck.cards[i];
-    const cardMaster = allCards.find(function(c) { return c.id === dc.id; });
+    const cardMaster = allCardsMap[dc.id] || allCards.find(function(c) { return c.id === dc.id; });
     const existing = state.inventory.find(function(item) {
       return item.storage_id === storage.id && item.card_id === dc.id;
     });
@@ -899,6 +1402,9 @@ function addDeckCards(deckId) {
     if (existing) {
       existing.count += dc.count;
       existing.updated_at = now;
+      if (!existing.card_ability_text && cardMaster && cardMaster.ability_text) {
+        existing.card_ability_text = cardMaster.ability_text;
+      }
     } else {
       const nextId = state.inventory.reduce(function(m, it) { return Math.max(m, it.id || 0); }, 0) + 1;
       state.inventory.unshift({
@@ -919,6 +1425,7 @@ function addDeckCards(deckId) {
         card_image: cardMaster ? (cardMaster.image || "") : "",
         card_alt_names: cardMaster ? (cardMaster.alt_names || null) : null,
         card_faces_json: cardMaster ? (cardMaster.faces_json || null) : null,
+        card_ability_text: cardMaster ? (cardMaster.ability_text || null) : null,
         count: dc.count,
         condition: "プレイ用",
         memo: "構築済みデッキ [" + deck.name + "]",
@@ -938,15 +1445,16 @@ function addDeckCards(deckId) {
 function onMasterSearch() {
   const rawVal = document.getElementById("masterSearchInput").value;
   const q = normalize(rawVal);
+  const hasFilters = hasActiveMasterFilter();
   const listEl = document.getElementById("masterSuggestList");
   const clearBtn = document.getElementById("btnClearSearch");
 
-  if (!q) {
+  clearBtn.style.display = rawVal ? "inline-flex" : "none";
+
+  if (!q && !hasFilters) {
     listEl.style.display = "none";
-    clearBtn.style.display = "none";
     return;
   }
-  clearBtn.style.display = "inline-flex";
   listEl.style.display = "block";
 
   if (allCards.length === 0) {
@@ -954,7 +1462,7 @@ function onMasterSearch() {
     return;
   }
 
-  const matchedDecks = searchDecksByQuery(rawVal);
+  const matchedDecks = q ? searchDecksByQuery(rawVal) : [];
   let decksHtml = "";
   if (matchedDecks.length > 0) {
     decksHtml = '<div style="background:linear-gradient(135deg, rgba(120,53,15,0.7), rgba(15,23,42,0.9));padding:10px 12px;border-bottom:1px solid rgba(245,158,11,0.4);">' +
@@ -979,15 +1487,25 @@ function onMasterSearch() {
 
   const matches = searchAllCardsByQuery(rawVal, 400);
   if (matches.length === 0 && matchedDecks.length === 0) {
-    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#64748b;font-size:12px;">「' + escapeHtml(rawVal) + '」に一致するカードまたは構築済みデッキが見つかりません</div>';
+    const emptyMsg = rawVal.trim()
+      ? '「' + escapeHtml(rawVal) + '」や絞り込み条件に一致するカードが見つかりません'
+      : '選択中の絞り込み条件に一致するカードが見つかりません';
+    listEl.innerHTML = '<div style="padding:16px;text-align:center;color:#64748b;font-size:12px;">' + emptyMsg + '</div>';
     return;
   }
 
   const selCount = parseInt(document.getElementById("addCountSelect").value, 10) || 1;
+  const headerBar = matches.length > 0 ? (
+    '<div style="padding:6px 10px;background:#0f172a;border-bottom:1px solid #1e293b;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:#94a3b8;">' +
+      '<span>検索結果: <strong style="color:#fff;">' + matches.length + '</strong>件' + (matches.length >= 400 ? ' (上限400件)' : '') + '</span>' +
+      '<button class="btn" style="padding:3px 8px;font-size:10px;" onclick="openBigSearchModal()">🔍 画面いっぱいに表示</button>' +
+    '</div>'
+  ) : "";
+
   const cardsHtml = matches.map(function(c) {
     const recent = recentAddedCounts[c.id] || 0;
     return '<div class="suggest-item">' +
-      '<div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;" onclick="addMasterCard(\'' + c.id + '\', null)">' +
+      '<div style="display:flex;align-items:flex-start;gap:10px;min-width:0;flex:1;" onclick="addMasterCard(\'' + c.id + '\', null)">' +
         '<img src="' + c.image + '" style="width:38px;height:52px;object-fit:cover;border-radius:6px;background:#1e293b;flex-shrink:0;" loading="lazy" alt="" />' +
         '<div style="min-width:0;flex:1;">' +
           (c.name_ruby ? '<div style="font-size:10px;color:#7dd3fc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(c.name_ruby) + '</div>' : '') +
@@ -995,10 +1513,12 @@ function onMasterSearch() {
           (c.alt_names ? '<div style="font-size:10px;color:#fcd34d;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">⇄ 裏面: ' + escapeHtml(c.alt_names) + '</div>' : '') +
           '<div style="font-size:11px;color:#94a3b8;">' +
             '<span style="color:#818cf8;font-family:monospace;">' + escapeHtml(c.pack) + '</span>' +
+            (c.civil ? ' / ' + escapeHtml(c.civil) : '') +
             (c.cost !== null ? ' / コスト' + c.cost : '') +
             (c.rarity ? ' / ' + escapeHtml(c.rarity) : '') +
             (recent > 0 ? ' <span style="color:#34d399;font-weight:800;">(✓+' + recent + '枚)</span>' : '') +
           '</div>' +
+          (c.ability_text ? '<div class="ability-preview">' + escapeHtml(c.ability_text) + '</div>' : '') +
         '</div>' +
       '</div>' +
       '<div style="display:flex;gap:5px;flex-shrink:0;">' +
@@ -1008,13 +1528,18 @@ function onMasterSearch() {
     '</div>';
   }).join("");
 
-  listEl.innerHTML = decksHtml + cardsHtml;
+  listEl.innerHTML = decksHtml + headerBar + cardsHtml;
 }
 
 function openBigSearchModal() {
   const mainInput = document.getElementById("masterSearchInput");
   const modalInput = document.getElementById("bigModalSearchInput");
   modalInput.value = mainInput.value || "";
+  if (hasActiveMasterFilter()) {
+    showModalFilterPanel = true;
+  }
+  document.getElementById("modalFilterPanel").style.display = showModalFilterPanel ? "block" : "none";
+  renderMasterFilterPanels();
   document.getElementById("bigSearchModal").classList.add("open");
   renderBigSearchModalResults();
 }
@@ -1034,15 +1559,18 @@ function renderBigSearchModalResults() {
   const rawVal = document.getElementById("bigModalSearchInput").value;
   const grid = document.getElementById("bigSearchGrid");
   const titleEl = document.getElementById("bigSearchTitle");
+  const hasFilters = hasActiveMasterFilter();
 
-  if (!normalize(rawVal)) {
+  if (!normalize(rawVal) && !hasFilters) {
     titleEl.textContent = "カード検索一覧";
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 14px;color:#64748b;font-size:13px;">上の入力欄にカード名・読み・型番を入力してください</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 14px;color:#64748b;font-size:13px;">上の入力欄にカード名・読み・型番を入力するか、「🎛 絞込」でマナ・コスト・効果を選択してください</div>';
     return;
   }
 
   const matches = searchAllCardsByQuery(rawVal, 400);
-  titleEl.textContent = "「" + rawVal + "」の検索結果 (" + matches.length + "件)";
+  titleEl.textContent = rawVal.trim()
+    ? "「" + rawVal + "」の検索結果 (" + matches.length + "件)"
+    : "絞り込み結果 (" + matches.length + "件)";
 
   if (matches.length === 0) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px 14px;color:#64748b;font-size:13px;">一致するカードが見つかりません</div>';
@@ -1064,6 +1592,7 @@ function renderBigSearchModalResults() {
           (c.name_ruby ? '<div style="font-size:9px;color:#7dd3fc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(c.name_ruby) + '</div>' : '') +
           '<div class="card-title" title="' + escapeHtml(c.name) + '">' + escapeHtml(c.name) + '</div>' +
           '<div class="card-sub"><span style="color:#818cf8;font-family:monospace;">' + escapeHtml(c.pack || "") + '</span></div>' +
+          (c.ability_text ? '<div class="ability-preview" title="' + escapeHtml(c.ability_text) + '">' + escapeHtml(c.ability_text) + '</div>' : '') +
         '</div>' +
         '<div style="display:flex;gap:5px;padding-top:6px;border-top:1px solid #1e293b;">' +
           '<button class="btn btn-primary" style="flex:1;justify-content:center;padding:7px 4px;" onclick="addMasterCard(\'' + c.id + '\', 1)">＋1枚</button>' +
@@ -1075,7 +1604,7 @@ function renderBigSearchModalResults() {
 }
 
 function addMasterCard(cardId, overrideCount) {
-  const card = allCards.find(function(c) { return c.id === cardId; });
+  const card = allCardsMap[cardId] || allCards.find(function(c) { return c.id === cardId; });
   if (!card) return;
   const storageId = parseInt(document.getElementById("addTargetStorage").value, 10) || (state.storages[0] && state.storages[0].id) || 1;
   const count = overrideCount || parseInt(document.getElementById("addCountSelect").value, 10) || 1;
@@ -1086,6 +1615,9 @@ function addMasterCard(cardId, overrideCount) {
   if (existing) {
     existing.count += count;
     existing.updated_at = now;
+    if (!existing.card_ability_text && card.ability_text) {
+      existing.card_ability_text = card.ability_text;
+    }
   } else {
     const nextId = state.inventory.reduce(function(m, i) { return Math.max(m, i.id || 0); }, 0) + 1;
     state.inventory.unshift({
@@ -1106,6 +1638,7 @@ function addMasterCard(cardId, overrideCount) {
       card_image: card.image || "",
       card_alt_names: card.alt_names || null,
       card_faces_json: card.faces_json || null,
+      card_ability_text: card.ability_text || null,
       count: count,
       condition: "プレイ用",
       memo: "",
@@ -1200,6 +1733,8 @@ function openDetailModal(invId, faceIdx) {
     '</div>'
   ) : '';
 
+  const abilityText = (f && f.skills) ? f.skills : getItemAbilityText(item);
+
   const box = document.getElementById("cardDetailBox");
   box.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
@@ -1215,6 +1750,8 @@ function openDetailModal(invId, faceIdx) {
       '<div style="margin-top:8px;font-size:12px;color:#cbd5e1;">' +
         '文明: ' + escapeHtml(f.civil || item.card_civil || "無色") + ' / コスト: ' + (f.cost ?? item.card_cost ?? "-") + ' / パワー: ' + escapeHtml(f.power || item.card_power || "-") +
       '</div>' +
+      ((f.race || item.card_race) ? '<div style="margin-top:4px;font-size:11px;color:#94a3b8;">種族: ' + escapeHtml(f.race || item.card_race) + '</div>' : '') +
+      (abilityText ? '<div class="ability-detail-box"><div style="font-size:11px;font-weight:800;color:#fcd34d;margin-bottom:4px;">✨ 特殊能力・効果</div>' + escapeHtml(abilityText) + '</div>' : '') +
       '<div style="margin-top:12px;padding-top:12px;border-top:1px solid #1e293b;display:flex;justify-content:center;align-items:center;gap:14px;">' +
         '<button class="btn-Step" onclick="changeCount(' + item.id + ', -1);openDetailModal(' + item.id + ', ' + currentDetailFaceIdx + ');">−</button>' +
         '<span style="font-size:16px;font-weight:800;">所持: ' + item.count + '枚</span>' +
@@ -1242,17 +1779,20 @@ function normalizeHostUrl(raw) {
 
 function applyFullStateRefresh(toastMsg) {
   selectedStorageId = "all";
-  filterCost = null;
-  filterCivilizations = [];
-  filterRarity = null;
-  filterType = null;
-  const sInput = document.getElementById("invSearch");
+  selectedCivils = [];
+  invCivilMode = "or";
+  selectedType = "all";
+  selectedRarity = "all";
+  selectedCosts = [];
+  selectedInvAbilities = [];
+  const sInput = document.getElementById("invSearchInput");
   if (sInput) sInput.value = "";
+  const efInput = document.getElementById("invEffectInput");
+  if (efInput) efInput.value = "";
   updateHeaderStats();
   renderStorageStrip();
   renderFilterBars();
   renderInventory();
-  renderStorageManager();
   if (toastMsg) showToast(toastMsg);
 }
 
@@ -1358,6 +1898,7 @@ renderConfirmDeleteBtn();
 updateHeaderStats();
 renderStorageStrip();
 renderFilterBars();
+renderMasterFilterPanels();
 renderInventory();
 initCardsDb();
 

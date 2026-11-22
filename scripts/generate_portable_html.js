@@ -44,6 +44,7 @@ const inventory = db.prepare(`
     c.image AS card_image,
     c.alt_names AS card_alt_names,
     c.faces_json AS card_faces_json,
+    c.ability_text AS card_ability_text,
     i.count,
     i.condition,
     i.memo,
@@ -55,7 +56,7 @@ const inventory = db.prepare(`
 `).all();
 
 const rawCards = db.prepare(`
-  SELECT id, name, name_ruby, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json
+  SELECT id, name, name_ruby, pack, type, civil, rarity, cost, power, race, image, alt_names, faces_json, ability_text
   FROM cards
 `).all();
 
@@ -73,6 +74,7 @@ const compactCards = rawCards.map((r) => [
   (r.image || '').replace(IMAGE_PREFIX, ''),
   r.alt_names || '',
   r.faces_json ? r.faces_json.replaceAll(IMAGE_PREFIX, '') : '',
+  r.ability_text || '',
 ]);
 
 const cardsGzipBase64 = zlib.gzipSync(JSON.stringify(compactCards)).toString('base64');

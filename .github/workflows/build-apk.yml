@@ -5,6 +5,7 @@ on:
     branches:
       - goto
       - main
+      - sakusaku
     paths-ignore:
       - '**.apk'
   workflow_dispatch:
